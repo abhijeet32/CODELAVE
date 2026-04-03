@@ -1,0 +1,38 @@
+# =============================================================================
+# Terraform — .gitignore
+# =============================================================================
+
+# Local .terraform directories (provider binaries, module cache)
+**/.terraform/*
+
+# Lock file — commit this to pin provider versions
+!**/.terraform.lock.hcl
+
+# Local state files — state is stored remotely in S3
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Crash & debug logs
+crash.log
+crash.*.log
+
+# Sensitive variable files — never commit secrets
+*.tfvars
+*.tfvars.json
+
+# Keep the example/template var files if you have any
+!*.tfvars.example
+
+# Override files (local dev overrides)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform plan output files
+*.tfplan
+
+# CLI config
+.terraformrc
+terraform.rc
