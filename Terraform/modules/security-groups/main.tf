@@ -130,15 +130,7 @@ resource "aws_security_group" "database" {
     security_groups = [aws_security_group.sandbox_host.id]
   }
 
-  # No outbound rules — database should never initiate outbound connections
-  egress {
-    description = "Deny all outbound (database should not initiate connections)"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [] # Intentionally empty — no egress
-    self        = false
-  }
+
 
   tags = {
     Name        = "codelave-sg-database-${var.environment}"
@@ -172,15 +164,7 @@ resource "aws_security_group" "redis" {
     security_groups = [aws_security_group.api_server.id]
   }
 
-  # No outbound rules — Redis should never initiate outbound connections
-  egress {
-    description = "Deny all outbound (Redis should not initiate connections)"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [] # Intentionally empty — no egress
-    self        = false
-  }
+
 
   tags = {
     Name        = "codelave-sg-redis-${var.environment}"

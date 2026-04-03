@@ -138,16 +138,10 @@ resource "aws_iam_user_group_membership" "admin" {
   groups = [aws_iam_group.admins.name]
 }
 
-# Login profile forces a password change on first login
-resource "aws_iam_user_login_profile" "admin" {
-  user                    = aws_iam_user.admin.name
-  password_reset_required = true
-
-  lifecycle {
-    # Prevent Terraform from regenerating the password on every plan
-    ignore_changes = [password_length, password_reset_required, pgp_key]
-  }
-}
+# Do not manage a console login profile for the human admin in Terraform.
+# Creating aws_iam_user_login_profile without a pgp_key causes Terraform to
+# generate and store the initial console password in state. Create or reset
+# the admin console password out-of-band instead.
 
 
 # =============================================================================
@@ -196,7 +190,10 @@ resource "aws_iam_role_policy" "api_server_policy" {
           "logs:PutLogEvents",
           "logs:DescribeLogStreams"
         ]
-        Resource = "arn:aws:logs:*:*:log-group:/codelave/*"
+        Resource = [
+          "arn:aws:logs:*:*:log-group:/codelave/*",
+          "arn:aws:logs:*:*:log-group:/codelave/*:log-stream:*"
+        ]
       }
     ]
   })
@@ -258,7 +255,10 @@ resource "aws_iam_role_policy" "sandbox_host_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = "arn:aws:logs:*:*:log-group:/codelave/sandbox/*"
+        Resource = [
+          "arn:aws:logs:*:*:log-group:/codelave/sandbox/*",
+          "arn:aws:logs:*:*:log-group:/codelave/sandbox/*:log-stream:*"
+        ]
       }
     ]
   })
