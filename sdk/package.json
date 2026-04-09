@@ -9,5 +9,14 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "workspaces": [
+    "packages/core",
+    "packages/node",
+    "packages/next"
+  ],
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0",
+    "typescript": "^6.0.2"
+  }
 }
