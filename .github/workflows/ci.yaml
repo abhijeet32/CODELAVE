@@ -1,0 +1,148 @@
+name: Codelave CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'README.md'
+
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - 'README.md'
+
+jobs:
+  changes:
+    name: Detect Changed Folders
+    runs-on: ubuntu-latest
+    outputs:
+      client: ${{ steps.filter.outputs.client }}
+      server: ${{ steps.filter.outputs.server }}
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
+        
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            client:
+              - 'client/**'
+            server:
+              - 'server/**'
+            infrastructure:
+              - 'infrastructure/**'
+    
+  client-checks:
+    name: Client checks
+    needs: changes
+    if: ${{ needs.changes.outputs.client  == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ./client/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --if-present
+
+  server-checks:
+    name: Server checks
+    needs: changes
+    if: ${{ needs.changes.outputs.server == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: ./server/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --if-present
+
+  sandbox-docker:
+    name: Sandbox Docker Base Image
+    needs: changes
+    if: ${{ needs.changes.outputs.infrastructure == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+        
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      # - name: Login to GitHub Container Registry
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Extract Metadata
+      #   id: meta
+      #   uses: docker/metadata-action@v5
+      #   with:
+      #     images: ghcr.io/${{ github.repository }}/sandbox-image
+
+      # - name: Build and Push Sandbox Image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: ./infrastructure/sandbox-dockerfiles/sandbox-base
+      #     push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}
+      #     cache-from: type=gha
+      #     cache-to: type=gha, mode=max
+
+  notifications:
+    name: Send Email on Failure
+    needs: [client-checks, server-checks, sandbox-docker]
+    if: always() && failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.USER_GMAIL }}
+          password: ${{ secrets.GMAIL_PASSWORD }}
+          subject: "CI Pipeline Failed: ${{ github.repository }}"
+          body: |
+              The build for ${{ github.ref }} failed. 
+              Check logs here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          to: kumarabhijeetips@gmail.com, amitkumarsingh843412@gmail.com, kumar27ankitsingh@gmail.com
+          from: CI-Bot
