@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "codelave"
+version = "1.0.0"
+description = "Python SDK for Codelave - managed code execution infrastructure"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "aiohttp>=3.8.0"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://codelave.com"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/codelave"]
+
+[tool.mypy]
+strict = true

@@ -1,98 +1,243 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Codelave Server
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**The backend API for the Codelave managed code execution platform.**
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A NestJS backend that creates and manages secure, isolated Docker container sandboxes for running AI-generated code. It receives requests from SDKs, orchestrates Docker containers on a remote sandbox host, executes code inside those containers, streams output in real time via WebSockets, and handles file operations — all with strict security, usage tracking, and free tier enforcement.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Architecture
 
-## Project setup
-
-```bash
-$ npm install
+```
+┌─────────────┐       ┌──────────────────┐       ┌──────────────────┐
+│  SDK / CLI  │──────▶│   NestJS API     │──────▶│  Sandbox Host    │
+│  (API Key)  │  HTTP │   (Port 3000)    │ TCP   │  (Docker Daemon) │
+└─────────────┘  + WS └────────┬─────────┘       └──────────────────┘
+                               │                         │
+                    ┌──────────┼──────────┐       ┌──────┴──────┐
+                    │          │          │       │  Container  │
+                    ▼          ▼          ▼       │  Container  │
+               PostgreSQL   Redis      S3/MinIO  │  Container  │
+                (Neon)     (Queues)   (Files)     └─────────────┘
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## Tech Stack
 
-# watch mode
-$ npm run start:dev
+| Layer          | Technology                        |
+|----------------|-----------------------------------|
+| Framework      | NestJS with TypeScript (strict)   |
+| ORM            | Prisma 7                          |
+| Database       | PostgreSQL (Neon)                 |
+| Auth           | JWT + SHA-256 hashed API keys     |
+| Containers     | Docker (remote daemon via TCP)    |
+| Real-time      | Socket.IO WebSocket gateway       |
+| Validation     | class-validator + class-transformer |
+| Docs           | Swagger (auto-generated)          |
+| Testing        | Jest (44 tests passing)           |
+| Scheduling     | @nestjs/schedule (cron jobs)      |
+| Rate Limiting  | @nestjs/throttler                 |
 
-# production mode
-$ npm run start:prod
+---
+
+## API Endpoints
+
+### Auth
+| Method   | Route              | Guard | Description                    |
+|----------|--------------------|-------|--------------------------------|
+| `POST`   | `/auth/register`   | —     | Register new user, get JWT     |
+| `POST`   | `/auth/login`      | —     | Login, get JWT                 |
+| `POST`   | `/auth/apikey`     | JWT   | Generate API key (shown once)  |
+| `GET`    | `/auth/apikey`     | JWT   | List all API keys              |
+| `DELETE` | `/auth/apikey/:id` | JWT   | Revoke an API key              |
+
+### Sandbox
+| Method   | Route            | Guard   | Description                 |
+|----------|------------------|---------|-----------------------------|
+| `POST`   | `/sandbox`       | API Key | Create sandbox + container  |
+| `GET`    | `/sandbox`       | API Key | List user's sandboxes       |
+| `GET`    | `/sandbox/:id`   | API Key | Get sandbox details         |
+| `DELETE` | `/sandbox/:id`   | API Key | Destroy sandbox + container |
+
+### Execution
+| Method   | Route                          | Guard   | Description             |
+|----------|--------------------------------|---------|-------------------------|
+| `POST`   | `/sandbox/:id/execute`         | API Key | Execute code (sync)     |
+| `GET`    | `/sandbox/:id/execute`         | API Key | List executions         |
+| `WS`     | `/ws/execute`                  | API Key | Stream output real-time |
+
+### Files
+| Method   | Route                              | Guard   | Description           |
+|----------|------------------------------------|---------|-----------------------|
+| `POST`   | `/sandbox/:id/files/upload`        | API Key | Upload file to sandbox|
+| `GET`    | `/sandbox/:id/files`               | API Key | List files            |
+| `GET`    | `/sandbox/:id/files/:name`         | API Key | Download file         |
+
+### Usage
+| Method   | Route     | Guard | Description              |
+|----------|-----------|-------|--------------------------|
+| `GET`    | `/usage`  | JWT   | Current month usage      |
+
+---
+
+## Project Structure
+
+```
+src/
+├── main.ts                          # Bootstrap + Swagger + global pipes
+├── app.module.ts                    # Root module
+├── auth/                            # Authentication + API key management
+│   ├── auth.controller.ts
+│   ├── auth.service.ts
+│   ├── auth.module.ts
+│   └── dto/auth.dto.ts
+├── sandbox/                         # Sandbox lifecycle (create/destroy)
+│   ├── sandbox.controller.ts
+│   ├── sandbox.service.ts
+│   ├── sandbox.module.ts
+│   └── dto/sandbox.dto.ts
+├── execution/                       # Code execution (REST + WebSocket)
+│   ├── execution.controller.ts
+│   ├── execution.service.ts
+│   ├── execution.gateway.ts         # WebSocket streaming
+│   ├── execution.module.ts
+│   └── dto/execution.dto.ts
+├── files/                           # File upload/download
+│   ├── files.controller.ts
+│   ├── files.service.ts
+│   ├── files.module.ts
+│   └── dto/files.dto.ts
+├── lifecycle/                       # Background cleanup (cron)
+│   ├── lifecycle.service.ts
+│   └── lifecycle.module.ts
+├── usage/                           # Usage tracking + limits
+│   ├── usage.controller.ts
+│   ├── usage.service.ts
+│   └── usage.module.ts
+├── docker/                          # Docker daemon integration
+│   ├── docker.service.ts
+│   └── docker.module.ts
+├── database/                        # Prisma client wrapper
+│   ├── prisma.service.ts
+│   └── database.module.ts
+└── common/                          # Shared infrastructure
+    ├── guards/
+    │   ├── jwt-auth.guard.ts
+    │   └── api-key.guard.ts
+    ├── filters/
+    │   └── http-exception.filter.ts
+    ├── interceptors/
+    │   └── logging.interceptor.ts
+    └── decorators/
+        └── current-user.decorator.ts
 ```
 
-## Run tests
+---
 
+## Getting Started
+
+### Prerequisites
+- Node.js ≥ 18
+- PostgreSQL database (or Neon account)
+- Docker daemon accessible via TCP (for sandbox host)
+
+### 1. Install dependencies
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd server
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 2. Configure environment
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cp .env.example .env
+# Edit .env with your database URL, JWT secret, Docker host, etc.
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 3. Generate Prisma client & push schema
+```bash
+npx prisma generate
+npx prisma db push
+```
 
-## Resources
+### 4. Start development server
+```bash
+npm run start:dev
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+The server will be running at:
+- **API:** http://localhost:3000
+- **Swagger docs:** http://localhost:3000/api
+- **WebSocket:** ws://localhost:3000/ws/execute
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 5. Run tests
+```bash
+npm test              # Run all tests
+npm run test:cov      # Run with coverage report
+```
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Environment Variables
 
-## Stay in touch
+| Variable                          | Description                              | Default              |
+|-----------------------------------|------------------------------------------|----------------------|
+| `DATABASE_URL`                    | PostgreSQL connection string             | —                    |
+| `PORT`                            | Server port                              | `3000`               |
+| `NODE_ENV`                        | Environment (development/production)     | `development`        |
+| `JWT_SECRET`                      | Secret for signing JWT tokens            | —                    |
+| `JWT_EXPIRATION`                  | JWT token expiration                     | `24h`                |
+| `DOCKER_HOST`                     | Remote Docker daemon address             | `tcp://localhost:2376` |
+| `SANDBOX_DEFAULT_TIMEOUT_SECONDS` | Default sandbox timeout                  | `300`                |
+| `SANDBOX_MEMORY_LIMIT`           | Container memory limit                   | `256m`               |
+| `SANDBOX_CPU_LIMIT`              | Container CPU limit (cores)              | `0.5`                |
+| `SANDBOX_PID_LIMIT`              | Container PID limit                      | `64`                 |
+| `SANDBOX_MAX_FILE_SIZE_BYTES`    | Max upload file size                     | `10485760` (10MB)    |
+| `FREE_TIER_MAX_SANDBOXES`       | Max sandboxes per month (free tier)      | `5`                  |
+| `FREE_TIER_MAX_EXECUTIONS`      | Max executions per month (free tier)     | `100`                |
+| `FREE_TIER_MAX_COMPUTE_SECONDS` | Max compute seconds per month            | `600`                |
+| `THROTTLE_TTL`                   | Rate limit window (seconds)              | `60`                 |
+| `THROTTLE_LIMIT`                 | Max requests per window                  | `30`                 |
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
+
+## Security
+
+- **Passwords** hashed with bcrypt (12 rounds)
+- **API keys** hashed with SHA-256 before database storage
+- **JWT Bearer** authentication on dashboard routes
+- **API Key** authentication (`X-API-Key` header) on SDK routes
+- **Ownership isolation** — users can only access their own sandboxes (403 on cross-user)
+- **Container hardening** — memory/CPU/PID limits, no-root user, capability dropping, no-new-privileges
+- **Consistent error shape** — every error returns `{ statusCode, message, error }`
+- **No sensitive data in logs** — API keys and passwords are never logged
+
+---
+
+## Useful Commands
+
+```bash
+# Kill process on a specific port
+fuser -k 3000/tcp
+
+# Generate Prisma client after schema changes
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+
+# Open Prisma Studio (database GUI)
+npx prisma studio
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start:prod
+```
+
+---
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+UNLICENSED — Private project.
