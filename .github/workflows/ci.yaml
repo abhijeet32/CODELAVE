@@ -2,14 +2,14 @@ name: Codelave CI
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
     paths-ignore:
       - 'README.md'
 
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - 'README.md'
+  # pull_request:
+  #   branches: [main]
+  #   paths-ignore:
+  #     - 'README.md'
 
 jobs:
   changes:

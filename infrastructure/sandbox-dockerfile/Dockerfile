@@ -1,8 +1,8 @@
 # Base Sandbox Image (Python 3 & Node.js)
-FROM alpine:3.19
+FROM alpine:3.24
 
 # Install Python 3 & Node.js
-RUN apk update && apk add --no-cache \
+RUN apk update && apk upgrade --available && apk add --no-cache \
     python3 \
     py3-pip \
     py3-numpy \
@@ -14,7 +14,7 @@ RUN apk update && apk add --no-cache \
     npm 
 
 # Install Node.js popular libraries
-RUN npm install -g mathjs lodash axios d3-scale \
+RUN npm install -g mathjs@11.9.0 lodash@4.17.21 axios@1.7.3 d3-scale@4.0.2 \
     && npm cache clean --force
 
 # Creates a non-root user
