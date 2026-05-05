@@ -30,7 +30,10 @@ export class DockerService {
   private docker: Docker;
 
   constructor(private readonly configService: ConfigService) {
-    const dockerHost = this.configService.get<string>('DOCKER_HOST', 'tcp://localhost:2376');
+    const dockerHost = this.configService.get<string>(
+      'DOCKER_HOST',
+      'tcp://localhost:2376',
+    );
     const parsed = new URL(dockerHost);
 
     this.docker = new Docker({
@@ -82,7 +85,9 @@ export class DockerService {
 
       await container.start();
 
-      this.logger.log(`Container created: ${container.id} for sandbox ${config.sandboxId}`);
+      this.logger.log(
+        `Container created: ${container.id} for sandbox ${config.sandboxId}`,
+      );
       return container.id;
     } catch (error: any) {
       this.handleDockerError(error, 'createContainer');
@@ -118,55 +123,58 @@ export class DockerService {
           this.killExec(container, exec).catch(() => {});
           resolve({
             output: '',
-            error: 'Execution timed out after ' + (timeoutMs / 1000) + ' seconds',
+            error: 'Execution timed out after ' + timeoutMs / 1000 + ' seconds',
             exitCode: 124,
           });
         }, timeoutMs);
 
-        exec.start({ hijack: true, stdin: false }, (err: Error | null, stream: any) => {
-          if (err) {
-            clearTimeout(timeout);
-            reject(this.translateDockerError(err));
-            return;
-          }
+        exec.start(
+          { hijack: true, stdin: false },
+          (err: Error | null, stream: any) => {
+            if (err) {
+              clearTimeout(timeout);
+              reject(this.translateDockerError(err));
+              return;
+            }
 
-          let stdout = '';
-          let stderr = '';
+            let stdout = '';
+            let stderr = '';
 
-          const stdoutStream = new PassThrough();
-          const stderrStream = new PassThrough();
+            const stdoutStream = new PassThrough();
+            const stderrStream = new PassThrough();
 
-          // Demux the multiplexed stream
-          this.docker.modem.demuxStream(stream, stdoutStream, stderrStream);
+            // Demux the multiplexed stream
+            this.docker.modem.demuxStream(stream, stdoutStream, stderrStream);
 
-          stdoutStream.on('data', (chunk: Buffer) => {
-            stdout += chunk.toString();
-          });
-
-          stderrStream.on('data', (chunk: Buffer) => {
-            stderr += chunk.toString();
-          });
-
-          stream.on('end', () => {
-            clearTimeout(timeout);
-            exec.inspect((inspectErr: Error | null, data: any) => {
-              if (inspectErr) {
-                resolve({ output: stdout, error: stderr, exitCode: -1 });
-              } else {
-                resolve({
-                  output: stdout,
-                  error: stderr,
-                  exitCode: data.ExitCode ?? -1,
-                });
-              }
+            stdoutStream.on('data', (chunk: Buffer) => {
+              stdout += chunk.toString();
             });
-          });
 
-          stream.on('error', (streamErr: Error) => {
-            clearTimeout(timeout);
-            reject(this.translateDockerError(streamErr));
-          });
-        });
+            stderrStream.on('data', (chunk: Buffer) => {
+              stderr += chunk.toString();
+            });
+
+            stream.on('end', () => {
+              clearTimeout(timeout);
+              exec.inspect((inspectErr: Error | null, data: any) => {
+                if (inspectErr) {
+                  resolve({ output: stdout, error: stderr, exitCode: -1 });
+                } else {
+                  resolve({
+                    output: stdout,
+                    error: stderr,
+                    exitCode: data.ExitCode ?? -1,
+                  });
+                }
+              });
+            });
+
+            stream.on('error', (streamErr: Error) => {
+              clearTimeout(timeout);
+              reject(this.translateDockerError(streamErr));
+            });
+          },
+        );
       });
     } catch (error: any) {
       this.handleDockerError(error, 'executeCode');
@@ -200,42 +208,47 @@ export class DockerService {
         User: '1000',
       });
 
-      exec.start({ hijack: true, stdin: false }, (err: Error | null, stream: any) => {
-        if (err) {
-          callbacks.onError(this.translateDockerError(err).message);
-          return;
-        }
+      exec.start(
+        { hijack: true, stdin: false },
+        (err: Error | null, stream: any) => {
+          if (err) {
+            callbacks.onError(this.translateDockerError(err).message);
+            return;
+          }
 
-        const timeout = setTimeout(() => {
-          this.killExec(container, exec).catch(() => {});
-          callbacks.onError(`Execution timed out after ${timeoutMs / 1000} seconds`);
-        }, timeoutMs);
+          const timeout = setTimeout(() => {
+            this.killExec(container, exec).catch(() => {});
+            callbacks.onError(
+              `Execution timed out after ${timeoutMs / 1000} seconds`,
+            );
+          }, timeoutMs);
 
-        const stdoutStream = new PassThrough();
-        const stderrStream = new PassThrough();
+          const stdoutStream = new PassThrough();
+          const stderrStream = new PassThrough();
 
-        this.docker.modem.demuxStream(stream, stdoutStream, stderrStream);
+          this.docker.modem.demuxStream(stream, stdoutStream, stderrStream);
 
-        stdoutStream.on('data', (chunk: Buffer) => {
-          callbacks.onData(chunk.toString(), false);
-        });
-
-        stderrStream.on('data', (chunk: Buffer) => {
-          callbacks.onData(chunk.toString(), true);
-        });
-
-        stream.on('end', () => {
-          clearTimeout(timeout);
-          exec.inspect((inspectErr: Error | null, data: any) => {
-            callbacks.onDone(inspectErr ? -1 : (data.ExitCode ?? -1));
+          stdoutStream.on('data', (chunk: Buffer) => {
+            callbacks.onData(chunk.toString(), false);
           });
-        });
 
-        stream.on('error', (streamErr: Error) => {
-          clearTimeout(timeout);
-          callbacks.onError(streamErr.message);
-        });
-      });
+          stderrStream.on('data', (chunk: Buffer) => {
+            callbacks.onData(chunk.toString(), true);
+          });
+
+          stream.on('end', () => {
+            clearTimeout(timeout);
+            exec.inspect((inspectErr: Error | null, data: any) => {
+              callbacks.onDone(inspectErr ? -1 : (data.ExitCode ?? -1));
+            });
+          });
+
+          stream.on('error', (streamErr: Error) => {
+            clearTimeout(timeout);
+            callbacks.onError(streamErr.message);
+          });
+        },
+      );
     } catch (error: any) {
       callbacks.onError(this.translateDockerError(error).message);
     }
@@ -384,7 +397,10 @@ export class DockerService {
     }
   }
 
-  private async killExec(container: Docker.Container, exec: Docker.Exec): Promise<void> {
+  private async killExec(
+    container: Docker.Container,
+    exec: Docker.Exec,
+  ): Promise<void> {
     try {
       // Send SIGKILL to the exec process
       const info = await exec.inspect();
@@ -418,7 +434,10 @@ export class DockerService {
     }
   }
 
-  private async createTarBuffer(fileName: string, content: Buffer): Promise<Buffer> {
+  private async createTarBuffer(
+    fileName: string,
+    content: Buffer,
+  ): Promise<Buffer> {
     // Simple tar implementation for single file
     const header = Buffer.alloc(512);
 
@@ -437,7 +456,10 @@ export class DockerService {
     header.write(sizeStr, 124, 12, 'utf-8');
 
     // Modification time
-    const mtime = Math.floor(Date.now() / 1000).toString(8).padStart(11, '0') + '\0';
+    const mtime =
+      Math.floor(Date.now() / 1000)
+        .toString(8)
+        .padStart(11, '0') + '\0';
     header.write(mtime, 136, 12, 'utf-8');
 
     // Checksum placeholder
@@ -460,7 +482,8 @@ export class DockerService {
 
     // Pad content to 512-byte boundary
     const padding = 512 - (content.length % 512);
-    const paddingBuffer = padding < 512 ? Buffer.alloc(padding) : Buffer.alloc(0);
+    const paddingBuffer =
+      padding < 512 ? Buffer.alloc(padding) : Buffer.alloc(0);
 
     // End-of-archive marker (two 512-byte zero blocks)
     const endMarker = Buffer.alloc(1024);
@@ -493,7 +516,9 @@ export class DockerService {
     }
 
     if (statusCode === 409) {
-      throw new InternalServerErrorException('Container conflict. It may already exist or be in use.');
+      throw new InternalServerErrorException(
+        'Container conflict. It may already exist or be in use.',
+      );
     }
 
     throw new InternalServerErrorException(

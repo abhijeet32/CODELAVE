@@ -40,7 +40,7 @@ async function bootstrap() {
     .setTitle('Codelave API')
     .setDescription(
       'Managed code execution infrastructure platform — ' +
-      'secure isolated sandbox environments for running AI-generated code inside Docker containers.',
+        'secure isolated sandbox environments for running AI-generated code inside Docker containers.',
     )
     .setVersion('1.0.0')
     .addTag('auth', 'Authentication & API key management')

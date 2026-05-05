@@ -37,7 +37,10 @@ export class FilesService {
     file: Express.Multer.File,
   ): Promise<FileResponseDto> {
     // 1. Validate sandbox
-    const sandbox = await this.sandboxService.validateRunningSandbox(userId, sandboxId);
+    const sandbox = await this.sandboxService.validateRunningSandbox(
+      userId,
+      sandboxId,
+    );
 
     // 2. Enforce file size limit
     if (file.size > this.maxFileSize) {
@@ -78,7 +81,10 @@ export class FilesService {
   /**
    * List all files in a sandbox.
    */
-  async listFiles(userId: string, sandboxId: string): Promise<FileResponseDto[]> {
+  async listFiles(
+    userId: string,
+    sandboxId: string,
+  ): Promise<FileResponseDto[]> {
     // Validate ownership (doesn't need to be running to list)
     await this.sandboxService.getSandbox(userId, sandboxId);
 
@@ -105,7 +111,10 @@ export class FilesService {
     fileName: string,
   ): Promise<Readable> {
     // Validate sandbox
-    const sandbox = await this.sandboxService.validateRunningSandbox(userId, sandboxId);
+    const sandbox = await this.sandboxService.validateRunningSandbox(
+      userId,
+      sandboxId,
+    );
 
     // Check file exists in database
     const fileRecord = await this.prisma.file.findFirst({

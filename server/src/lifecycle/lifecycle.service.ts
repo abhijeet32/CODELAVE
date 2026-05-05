@@ -95,7 +95,9 @@ export class LifecycleService {
           try {
             await this.dockerService.destroyContainer(containerId);
             orphanCount++;
-            this.logger.warn(`Orphaned container destroyed: ${containerId.substring(0, 12)}`);
+            this.logger.warn(
+              `Orphaned container destroyed: ${containerId.substring(0, 12)}`,
+            );
           } catch (error: any) {
             this.logger.error(
               `Failed to destroy orphaned container ${containerId.substring(0, 12)}: ${error.message}`,

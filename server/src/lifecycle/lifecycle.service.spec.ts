@@ -32,13 +32,17 @@ describe('LifecycleService', () => {
     service = module.get<LifecycleService>(LifecycleService);
   });
 
-  it('should be defined', () => { expect(service).toBeDefined(); });
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
 
   it('should destroy expired sandboxes', async () => {
-    prisma.sandbox.findMany.mockResolvedValueOnce([
-      { id: 'sbx-1', status: 'RUNNING', containerId: 'c1' },
-      { id: 'sbx-2', status: 'RUNNING', containerId: 'c2' },
-    ]).mockResolvedValue([]);
+    prisma.sandbox.findMany
+      .mockResolvedValueOnce([
+        { id: 'sbx-1', status: 'RUNNING', containerId: 'c1' },
+        { id: 'sbx-2', status: 'RUNNING', containerId: 'c2' },
+      ])
+      .mockResolvedValue([]);
 
     await service.handleExpiredSandboxes();
 
@@ -46,9 +50,11 @@ describe('LifecycleService', () => {
   });
 
   it('should handle errors gracefully during cleanup', async () => {
-    prisma.sandbox.findMany.mockResolvedValueOnce([
-      { id: 'sbx-1', status: 'RUNNING', containerId: 'c1' },
-    ]).mockResolvedValue([]);
+    prisma.sandbox.findMany
+      .mockResolvedValueOnce([
+        { id: 'sbx-1', status: 'RUNNING', containerId: 'c1' },
+      ])
+      .mockResolvedValue([]);
     sandboxService.destroySandboxInternal.mockRejectedValue(new Error('fail'));
 
     // Should not throw

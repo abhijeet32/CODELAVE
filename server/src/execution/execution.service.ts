@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { DockerService } from '../docker/docker.service';
 import { UsageService } from '../usage/usage.service';
@@ -30,7 +27,10 @@ export class ExecutionService {
     language: string = 'python',
   ): Promise<ExecutionResponseDto> {
     // 1. Validate sandbox ownership and status
-    const sandbox = await this.sandboxService.validateRunningSandbox(userId, sandboxId);
+    const sandbox = await this.sandboxService.validateRunningSandbox(
+      userId,
+      sandboxId,
+    );
 
     // 2. Check execution limit
     await this.usageService.checkExecutionLimit(userId);
@@ -119,7 +119,10 @@ export class ExecutionService {
     },
   ): Promise<void> {
     // 1. Validate
-    const sandbox = await this.sandboxService.validateRunningSandbox(userId, sandboxId);
+    const sandbox = await this.sandboxService.validateRunningSandbox(
+      userId,
+      sandboxId,
+    );
 
     // 2. Check limit
     await this.usageService.checkExecutionLimit(userId);
@@ -205,14 +208,18 @@ export class ExecutionService {
     sandboxId: string,
   ): Promise<ExecutionResponseDto[]> {
     // Validate ownership
-    await this.sandboxService.validateRunningSandbox(userId, sandboxId).catch(() => {
-      // Also allow listing for non-running sandboxes that belong to the user
-      return this.prisma.sandbox.findUnique({ where: { id: sandboxId } }).then((s) => {
-        if (!s) throw new Error('Sandbox not found');
-        if (s.userId !== userId) throw new Error('Access denied');
-        return s;
+    await this.sandboxService
+      .validateRunningSandbox(userId, sandboxId)
+      .catch(() => {
+        // Also allow listing for non-running sandboxes that belong to the user
+        return this.prisma.sandbox
+          .findUnique({ where: { id: sandboxId } })
+          .then((s) => {
+            if (!s) throw new Error('Sandbox not found');
+            if (s.userId !== userId) throw new Error('Access denied');
+            return s;
+          });
       });
-    });
 
     const executions = await this.prisma.execution.findMany({
       where: { sandboxId },

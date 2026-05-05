@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, UnauthorizedException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnauthorizedException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -9,7 +14,7 @@ import * as crypto from 'crypto';
 
 // Mock bcrypt
 jest.mock('bcrypt');
-const mockBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
+const mockBcrypt = bcrypt;
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -129,9 +134,9 @@ describe('AuthService', () => {
       });
       (mockBcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(
-        service.login('test@example.com', 'wrong'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(service.login('test@example.com', 'wrong')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -183,8 +188,20 @@ describe('AuthService', () => {
   describe('listApiKeys', () => {
     it('should return keys without hashed values', async () => {
       prisma.apiKey.findMany.mockResolvedValue([
-        { id: 'key-1', name: 'Key 1', createdAt: new Date(), lastUsed: null, isActive: true },
-        { id: 'key-2', name: 'Key 2', createdAt: new Date(), lastUsed: new Date(), isActive: false },
+        {
+          id: 'key-1',
+          name: 'Key 1',
+          createdAt: new Date(),
+          lastUsed: null,
+          isActive: true,
+        },
+        {
+          id: 'key-2',
+          name: 'Key 2',
+          createdAt: new Date(),
+          lastUsed: new Date(),
+          isActive: false,
+        },
       ]);
 
       const result = await service.listApiKeys('user-1');
@@ -224,9 +241,9 @@ describe('AuthService', () => {
         userId: 'other-user',
       });
 
-      await expect(
-        service.revokeApiKey('user-1', 'key-1'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.revokeApiKey('user-1', 'key-1')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

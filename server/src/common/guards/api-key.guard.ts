@@ -20,7 +20,9 @@ export class ApiKeyGuard implements CanActivate {
     const apiKey = this.extractApiKey(request);
 
     if (!apiKey) {
-      throw new UnauthorizedException('Missing API key. Provide X-API-Key header.');
+      throw new UnauthorizedException(
+        'Missing API key. Provide X-API-Key header.',
+      );
     }
 
     // Hash the provided key and look it up
@@ -46,7 +48,9 @@ export class ApiKeyGuard implements CanActivate {
         data: { lastUsed: new Date() },
       })
       .catch((err: Error) => {
-        this.logger.warn(`Failed to update lastUsed for API key: ${err.message}`);
+        this.logger.warn(
+          `Failed to update lastUsed for API key: ${err.message}`,
+        );
       });
 
     // Attach user to request

@@ -99,12 +99,18 @@ export class AuthService {
    * Generate a new API key for the user.
    * Returns the plain key only once.
    */
-  async createApiKey(userId: string, name: string): Promise<CreatedApiKeyResponseDto> {
+  async createApiKey(
+    userId: string,
+    name: string,
+  ): Promise<CreatedApiKeyResponseDto> {
     // Generate a unique API key
     const plainKey = `clv_${uuidv4().replace(/-/g, '')}${crypto.randomBytes(8).toString('hex')}`;
 
     // Hash before storing
-    const hashedKey = crypto.createHash('sha256').update(plainKey).digest('hex');
+    const hashedKey = crypto
+      .createHash('sha256')
+      .update(plainKey)
+      .digest('hex');
 
     const apiKey = await this.prisma.apiKey.create({
       data: {
