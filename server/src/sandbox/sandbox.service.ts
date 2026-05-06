@@ -58,7 +58,7 @@ export class SandboxService {
       // 4. Create Docker container on sandbox host
       const containerId = await this.dockerService.createContainer({
         sandboxId: sandbox.id,
-        image: template?.dockerImage || 'python:3.11-slim',
+        image: template?.dockerImage || 'ghcr.io/abhijeet32/codelave/sandbox-image:dev',
         memoryLimit: this.configService.get<string>(
           'SANDBOX_MEMORY_LIMIT',
           '256m',

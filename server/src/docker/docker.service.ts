@@ -30,19 +30,21 @@ export class DockerService {
   private docker: Docker;
 
   constructor(private readonly configService: ConfigService) {
-    const dockerHost = this.configService.get<string>(
-      'DOCKER_HOST',
-      'tcp://localhost:2376',
-    );
-    const parsed = new URL(dockerHost);
+    const dockerHost = this.configService.get<string>('DOCKER_HOST');
 
-    this.docker = new Docker({
-      host: parsed.hostname,
-      port: parseInt(parsed.port || '2376', 10),
-      protocol: parsed.protocol === 'https:' ? 'https' : 'http',
-    });
-
-    this.logger.log(`Docker client configured for ${dockerHost}`);
+    if (!dockerHost) {
+      // Default to local socket (e.g. /var/run/docker.sock or //./pipe/docker_engine)
+      this.docker = new Docker();
+      this.logger.log(`Docker client configured for local socket`);
+    } else {
+      const parsed = new URL(dockerHost);
+      this.docker = new Docker({
+        host: parsed.hostname,
+        port: parseInt(parsed.port || '2376', 10),
+        protocol: parsed.protocol === 'https:' ? 'https' : 'http',
+      });
+      this.logger.log(`Docker client configured for ${dockerHost}`);
+    }
   }
 
   /**
@@ -59,8 +61,8 @@ export class DockerService {
         name: `codelave-sandbox-${config.sandboxId}`,
         Tty: true,
         OpenStdin: true,
-        // Run as non-root user (uid 1000)
-        User: '1000',
+        // Run as the user defined in the image
+        // User: '1000',
         HostConfig: {
           Memory: memoryBytes,
           NanoCpus: cpuNanoCpus,
@@ -73,14 +75,14 @@ export class DockerService {
           // Tmpfs for writable directories
           Tmpfs: {
             '/tmp': 'rw,noexec,nosuid,size=64m',
-            '/home/sandbox': 'rw,noexec,nosuid,size=128m',
+            '/sandbox': 'rw,noexec,nosuid,size=128m',
           },
           // Drop all capabilities, add only what's needed
           CapDrop: ['ALL'],
           CapAdd: ['SETUID', 'SETGID'],
         },
-        WorkingDir: '/home/sandbox',
-        Cmd: ['/bin/sh', '-c', 'tail -f /dev/null'], // Keep container alive
+        WorkingDir: '/sandbox',
+        Cmd: ['python3', '-c', 'import time; time.sleep(86400)'], // Keep container alive without needing /bin/sh
       });
 
       await container.start();
@@ -291,7 +293,7 @@ export class DockerService {
     containerId: string,
     fileBuffer: Buffer,
     fileName: string,
-    destPath: string = '/home/sandbox',
+    destPath: string = '/sandbox',
   ): Promise<void> {
     try {
       const container = this.docker.getContainer(containerId);
