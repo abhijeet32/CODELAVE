@@ -35,10 +35,11 @@ export class SandboxController {
     @Body() dto: CreateSandboxDto,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<SandboxResponseDto> {
+    const timeoutSeconds = dto.timeoutSeconds || (dto.timeoutMinutes ? Math.round(dto.timeoutMinutes * 60) : undefined);
     return this.sandboxService.createSandbox(
       user.sub,
       dto.template,
-      dto.timeoutSeconds,
+      timeoutSeconds,
     );
   }
 
