@@ -30,20 +30,25 @@ export class DockerService {
   private docker: Docker;
 
   constructor(private readonly configService: ConfigService) {
-    const dockerHost = this.configService.get<string>('DOCKER_HOST');
-
-    if (!dockerHost) {
-      // Default to local socket (e.g. /var/run/docker.sock or //./pipe/docker_engine)
-      this.docker = new Docker();
-      this.logger.log(`Docker client configured for local socket`);
+    const dockerHost = this.configService.get<string>('DOCKER_HOST', '/var/run/docker.sock');
+    
+    if (dockerHost.startsWith('/') || dockerHost.startsWith('unix://')) {
+      const socketPath = dockerHost.replace('unix://', '');
+      this.docker = new Docker({ socketPath });
+      this.logger.log(`Docker client configured for socket: ${socketPath}`);
     } else {
-      const parsed = new URL(dockerHost);
-      this.docker = new Docker({
-        host: parsed.hostname,
-        port: parseInt(parsed.port || '2376', 10),
-        protocol: parsed.protocol === 'https:' ? 'https' : 'http',
-      });
-      this.logger.log(`Docker client configured for ${dockerHost}`);
+      try {
+        const parsed = new URL(dockerHost);
+        this.docker = new Docker({
+          host: parsed.hostname,
+          port: parseInt(parsed.port || '2376', 10),
+          protocol: parsed.protocol === 'https:' ? 'https' : 'http',
+        });
+        this.logger.log(`Docker client configured for host: ${dockerHost}`);
+      } catch (error) {
+        this.docker = new Docker({ socketPath: '/var/run/docker.sock' });
+        this.logger.log(`Docker client configured for local socket (fallback): /var/run/docker.sock`);
+      }
     }
   }
 
@@ -66,7 +71,7 @@ export class DockerService {
         HostConfig: {
           Memory: memoryBytes,
           NanoCpus: cpuNanoCpus,
-          PidsLimit: config.pidLimit,
+          PidsLimit: Number(config.pidLimit),
           NetworkMode: config.networkMode,
           // Read-only root filesystem
           ReadonlyRootfs: false, // Some templates need write access to /tmp

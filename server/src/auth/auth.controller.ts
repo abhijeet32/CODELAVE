@@ -23,6 +23,7 @@ import {
   AuthResponseDto,
   ApiKeyResponseDto,
   CreatedApiKeyResponseDto,
+  ChangePasswordDto,
 } from './dto/auth.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import {
@@ -58,6 +59,30 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
     return this.authService.login(dto.email, dto.password);
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 401, description: 'Current password incorrect' })
+  async changePassword(
+    @Body() dto: ChangePasswordDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<void> {
+    return this.authService.changePassword(user.sub, dto.currentPassword, dto.newPassword);
+  }
+
+  @Delete('account')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete user account' })
+  @ApiResponse({ status: 204, description: 'Account deleted' })
+  async deleteAccount(@CurrentUser() user: CurrentUserPayload): Promise<void> {
+    return this.authService.deleteAccount(user.sub);
   }
 
   @Post('apikey')

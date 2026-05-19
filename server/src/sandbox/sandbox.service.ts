@@ -178,12 +178,12 @@ export class SandboxService {
   /**
    * Internal method to destroy a sandbox by ID (for lifecycle cleanup).
    */
-  async destroySandboxInternal(sandboxId: string): Promise<void> {
+  async destroySandboxInternal(sandboxId: string, status: 'DESTROYED' | 'TIMED_OUT' | 'LOST' = 'DESTROYED'): Promise<void> {
     const sandbox = await this.prisma.sandbox.findUnique({
       where: { id: sandboxId },
     });
 
-    if (!sandbox || sandbox.status === 'DESTROYED') {
+    if (!sandbox || sandbox.status === 'DESTROYED' || sandbox.status === 'TIMED_OUT' || sandbox.status === 'LOST') {
       return;
     }
 
@@ -194,14 +194,14 @@ export class SandboxService {
     await this.prisma.sandbox.update({
       where: { id: sandboxId },
       data: {
-        status: 'DESTROYED',
+        status: status,
         destroyedAt: new Date(),
       },
     });
 
     this.cancelTimeoutTimer(sandboxId);
 
-    this.logger.log(`Sandbox auto-destroyed: ${sandboxId}`);
+    this.logger.log(`Sandbox auto-destroyed (${status}): ${sandboxId}`);
   }
 
   /**
@@ -240,7 +240,7 @@ export class SandboxService {
     const timer = setTimeout(async () => {
       this.logger.log(`Sandbox timeout reached: ${sandboxId}`);
       try {
-        await this.destroySandboxInternal(sandboxId);
+        await this.destroySandboxInternal(sandboxId, 'TIMED_OUT');
       } catch (error: any) {
         this.logger.error(
           `Failed to auto-destroy sandbox ${sandboxId}: ${error.message}`,

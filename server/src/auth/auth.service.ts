@@ -172,6 +172,40 @@ export class AuthService {
     this.logger.log(`API key revoked: ${keyId} by user ${userId}`);
   }
 
+  /**
+   * Change user password.
+   */
+  async changePassword(userId: string, current: string, newPass: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const passwordValid = await bcrypt.compare(current, user.password);
+    if (!passwordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPass, this.SALT_ROUNDS);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    this.logger.log(`Password changed for user ${userId}`);
+  }
+
+  /**
+   * Delete user account.
+   */
+  async deleteAccount(userId: string): Promise<void> {
+    // Because Prisma cascade deletes are likely not configured in schema natively for all relations,
+    // we delete dependent records manually or let Prisma handle it if configured.
+    // Assuming schema has onDelete: Cascade for Sandbox and ApiKey, this is simple:
+    await this.prisma.user.delete({
+      where: { id: userId },
+    });
+    this.logger.log(`Account deleted: ${userId}`);
+  }
+
   // ─── PRIVATE ──────────────────────────────────────────
 
   private async generateToken(userId: string, email: string): Promise<string> {

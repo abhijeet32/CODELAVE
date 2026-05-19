@@ -219,7 +219,9 @@ exports.SandboxStatus = exports.$Enums.SandboxStatus = {
   RUNNING: 'RUNNING',
   STOPPED: 'STOPPED',
   DESTROYED: 'DESTROYED',
-  ERROR: 'ERROR'
+  ERROR: 'ERROR',
+  TIMED_OUT: 'TIMED_OUT',
+  LOST: 'LOST'
 };
 
 exports.Prisma.ModelName = {
