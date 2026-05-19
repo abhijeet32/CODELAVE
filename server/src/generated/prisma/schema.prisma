@@ -28,6 +28,8 @@ enum SandboxStatus {
   STOPPED
   DESTROYED
   ERROR
+  TIMED_OUT
+  LOST
 }
 
 // ─── USERS ──────────────────────────────────────────────────

@@ -76,7 +76,9 @@ export const SandboxStatus: {
   RUNNING: 'RUNNING',
   STOPPED: 'STOPPED',
   DESTROYED: 'DESTROYED',
-  ERROR: 'ERROR'
+  ERROR: 'ERROR',
+  TIMED_OUT: 'TIMED_OUT',
+  LOST: 'LOST'
 };
 
 export type SandboxStatus = (typeof SandboxStatus)[keyof typeof SandboxStatus]

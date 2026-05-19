@@ -3,12 +3,14 @@ import { LifecycleService } from './lifecycle.service';
 import { PrismaService } from '../database/prisma.service';
 import { DockerService } from '../docker/docker.service';
 import { SandboxService } from '../sandbox/sandbox.service';
+import { getQueueToken } from '@nestjs/bullmq';
 
 describe('LifecycleService', () => {
   let service: LifecycleService;
   let prisma: any;
   let dockerService: any;
   let sandboxService: any;
+  let queue: any;
 
   beforeEach(async () => {
     prisma = {
@@ -21,12 +23,18 @@ describe('LifecycleService', () => {
     sandboxService = {
       destroySandboxInternal: jest.fn().mockResolvedValue(undefined),
     };
+    queue = {
+      getRepeatableJobs: jest.fn().mockResolvedValue([]),
+      removeRepeatableByKey: jest.fn().mockResolvedValue(undefined),
+      add: jest.fn().mockResolvedValue(undefined),
+    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         LifecycleService,
         { provide: PrismaService, useValue: prisma },
         { provide: DockerService, useValue: dockerService },
         { provide: SandboxService, useValue: sandboxService },
+        { provide: getQueueToken('lifecycle-queue'), useValue: queue },
       ],
     }).compile();
     service = module.get<LifecycleService>(LifecycleService);
@@ -56,7 +64,7 @@ describe('LifecycleService', () => {
   });
 
   it('should skip overlapping runs', async () => {
-    (service as any).isRunning = true;
+    (service as any).isCheckingExpired = true;
     await service.handleExpiredSandboxes();
     expect(prisma.sandbox.findMany).not.toHaveBeenCalled();
   });

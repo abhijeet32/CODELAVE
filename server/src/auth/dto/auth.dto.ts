@@ -67,3 +67,16 @@ export class CreatedApiKeyResponseDto {
   @ApiProperty()
   name!: string;
 }
+
+export class ChangePasswordDto {
+  @ApiProperty({ example: 'strongPassword123', description: 'Current password' })
+  @IsString()
+  @MinLength(1, { message: 'Current password is required' })
+  currentPassword!: string;
+
+  @ApiProperty({ example: 'newStrongPassword456', description: 'New Password (min 8 chars)' })
+  @IsString()
+  @MinLength(8, { message: 'New password must be at least 8 characters' })
+  @MaxLength(128, { message: 'New password must be at most 128 characters' })
+  newPassword!: string;
+}
