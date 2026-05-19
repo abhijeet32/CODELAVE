@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
 
@@ -41,7 +36,10 @@ export class UsageService {
   /**
    * Get or create usage record for a user in the current month.
    */
-  async getOrCreateUsage(userId: string, month?: string): Promise<UsageSummary> {
+  async getOrCreateUsage(
+    userId: string,
+    month?: string,
+  ): Promise<UsageSummary> {
     const currentMonth = month || this.getCurrentMonth();
 
     const usage = await this.prisma.usage.upsert({
@@ -162,9 +160,18 @@ export class UsageService {
     // For now, return free tier limits from config.
     // In the future, look up the user's plan and return appropriate limits.
     return {
-      maxSandboxes: this.configService.get<number>('FREE_TIER_MAX_SANDBOXES', 5),
-      maxExecutions: this.configService.get<number>('FREE_TIER_MAX_EXECUTIONS', 100),
-      maxComputeSeconds: this.configService.get<number>('FREE_TIER_MAX_COMPUTE_SECONDS', 600),
+      maxSandboxes: this.configService.get<number>(
+        'FREE_TIER_MAX_SANDBOXES',
+        5,
+      ),
+      maxExecutions: this.configService.get<number>(
+        'FREE_TIER_MAX_EXECUTIONS',
+        100,
+      ),
+      maxComputeSeconds: this.configService.get<number>(
+        'FREE_TIER_MAX_COMPUTE_SECONDS',
+        600,
+      ),
     };
   }
 }

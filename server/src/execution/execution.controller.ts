@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -15,7 +8,10 @@ import {
 import { ExecutionService } from './execution.service';
 import { ExecuteCodeDto, ExecutionResponseDto } from './dto/execution.dto';
 import { ApiKeyGuard } from '../common/guards/api-key.guard';
-import { CurrentUser, CurrentUserPayload } from '../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  CurrentUserPayload,
+} from '../common/decorators/current-user.decorator';
 
 @ApiTags('execution')
 @Controller('sandbox/:sandboxId/execute')
@@ -26,7 +22,11 @@ export class ExecutionController {
 
   @Post()
   @ApiOperation({ summary: 'Execute code inside a sandbox' })
-  @ApiResponse({ status: 201, description: 'Execution result', type: ExecutionResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Execution result',
+    type: ExecutionResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Sandbox not running' })
   @ApiResponse({ status: 404, description: 'Sandbox not found' })
   @ApiResponse({ status: 429, description: 'Execution limit exceeded' })
@@ -45,7 +45,11 @@ export class ExecutionController {
 
   @Get()
   @ApiOperation({ summary: 'List all executions for a sandbox' })
-  @ApiResponse({ status: 200, description: 'List of executions', type: [ExecutionResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of executions',
+    type: [ExecutionResponseDto],
+  })
   async listExecutions(
     @Param('sandboxId') sandboxId: string,
     @CurrentUser() user: CurrentUserPayload,

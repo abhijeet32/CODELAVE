@@ -1,5 +1,5 @@
 # Base Sandbox Image (Python 3 & Node.js)
-FROM alpine:3.24
+FROM alpine:3.21
 
 # Install Python 3 & Node.js
 RUN apk update && apk upgrade --available && apk add --no-cache \
@@ -18,7 +18,7 @@ RUN npm install -g mathjs@11.9.0 lodash@4.17.21 axios@1.7.3 d3-scale@4.0.2 \
     && npm cache clean --force
 
 # Creates a non-root user
-RUN adduser -S sandboxgroup && adduser -S sandboxuser -G sandboxgroup
+RUN addgroup -S sandboxgroup && adduser -S sandboxuser -G sandboxgroup
 
 # Set working directory
 WORKDIR /sandbox

@@ -26,7 +26,10 @@ import {
   ChangePasswordDto,
 } from './dto/auth.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUser, CurrentUserPayload } from '../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  CurrentUserPayload,
+} from '../common/decorators/current-user.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -35,7 +38,11 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User registered successfully', type: AuthResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'User registered successfully',
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 409, description: 'Email already registered' })
   async register(@Body() dto: RegisterDto): Promise<AuthResponseDto> {
     return this.authService.register(dto.email, dto.password);
@@ -44,7 +51,11 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login and get JWT token' })
-  @ApiResponse({ status: 200, description: 'Login successful', type: AuthResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
     return this.authService.login(dto.email, dto.password);
@@ -78,7 +89,11 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate a new API key' })
-  @ApiResponse({ status: 201, description: 'API key created (shown only once)', type: CreatedApiKeyResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'API key created (shown only once)',
+    type: CreatedApiKeyResponseDto,
+  })
   async createApiKey(
     @Body() dto: CreateApiKeyDto,
     @CurrentUser() user: CurrentUserPayload,
@@ -90,8 +105,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all API keys for current user' })
-  @ApiResponse({ status: 200, description: 'API keys list', type: [ApiKeyResponseDto] })
-  async listApiKeys(@CurrentUser() user: CurrentUserPayload): Promise<ApiKeyResponseDto[]> {
+  @ApiResponse({
+    status: 200,
+    description: 'API keys list',
+    type: [ApiKeyResponseDto],
+  })
+  async listApiKeys(
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<ApiKeyResponseDto[]> {
     return this.authService.listApiKeys(user.sub);
   }
 
@@ -102,7 +123,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Revoke an API key' })
   @ApiResponse({ status: 204, description: 'API key revoked' })
   @ApiResponse({ status: 404, description: 'API key not found' })
-  @ApiResponse({ status: 403, description: 'Not authorized to revoke this key' })
+  @ApiResponse({
+    status: 403,
+    description: 'Not authorized to revoke this key',
+  })
   async revokeApiKey(
     @Param('id') id: string,
     @CurrentUser() user: CurrentUserPayload,

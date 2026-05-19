@@ -37,7 +37,10 @@ export class SandboxService {
 
     // 2. Resolve template
     const template = await this.resolveTemplate(templateName || 'python3');
-    const defaultTimeout = this.configService.get<number>('SANDBOX_DEFAULT_TIMEOUT_SECONDS', 300);
+    const defaultTimeout = this.configService.get<number>(
+      'SANDBOX_DEFAULT_TIMEOUT_SECONDS',
+      300,
+    );
     const timeout = timeoutSeconds || defaultTimeout;
     const timeoutAt = new Date(Date.now() + timeout * 1000);
 
@@ -55,8 +58,11 @@ export class SandboxService {
       // 4. Create Docker container on sandbox host
       const containerId = await this.dockerService.createContainer({
         sandboxId: sandbox.id,
-        image: template?.dockerImage || 'python:3.11-slim',
-        memoryLimit: this.configService.get<string>('SANDBOX_MEMORY_LIMIT', '256m'),
+        image: template?.dockerImage || 'ghcr.io/abhijeet32/codelave/sandbox-image:dev',
+        memoryLimit: this.configService.get<string>(
+          'SANDBOX_MEMORY_LIMIT',
+          '256m',
+        ),
         cpuLimit: this.configService.get<string>('SANDBOX_CPU_LIMIT', '0.5'),
         pidLimit: this.configService.get<number>('SANDBOX_PID_LIMIT', 64),
         networkMode: template?.hasInternet ? 'bridge' : 'none',
@@ -78,7 +84,9 @@ export class SandboxService {
       // 7. Increment usage
       await this.usageService.incrementSandboxCount(userId);
 
-      this.logger.log(`Sandbox created: ${sandbox.id} (container: ${containerId})`);
+      this.logger.log(
+        `Sandbox created: ${sandbox.id} (container: ${containerId})`,
+      );
 
       return this.toResponse(updated);
     } catch (error) {
@@ -94,7 +102,10 @@ export class SandboxService {
   /**
    * Get a single sandbox by ID (with ownership check).
    */
-  async getSandbox(userId: string, sandboxId: string): Promise<SandboxResponseDto> {
+  async getSandbox(
+    userId: string,
+    sandboxId: string,
+  ): Promise<SandboxResponseDto> {
     const sandbox = await this.prisma.sandbox.findUnique({
       where: { id: sandboxId },
       include: { template: true },
@@ -211,7 +222,9 @@ export class SandboxService {
     }
 
     if (sandbox.status !== 'RUNNING') {
-      throw new BadRequestException(`Sandbox is not running (status: ${sandbox.status})`);
+      throw new BadRequestException(
+        `Sandbox is not running (status: ${sandbox.status})`,
+      );
     }
 
     if (!sandbox.containerId) {
@@ -229,7 +242,9 @@ export class SandboxService {
       try {
         await this.destroySandboxInternal(sandboxId, 'TIMED_OUT');
       } catch (error: any) {
-        this.logger.error(`Failed to auto-destroy sandbox ${sandboxId}: ${error.message}`);
+        this.logger.error(
+          `Failed to auto-destroy sandbox ${sandboxId}: ${error.message}`,
+        );
       }
     }, timeoutSeconds * 1000);
 

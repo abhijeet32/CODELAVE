@@ -21,7 +21,10 @@ import { Response } from 'express';
 import { FilesService } from './files.service';
 import { FileResponseDto } from './dto/files.dto';
 import { ApiKeyGuard } from '../common/guards/api-key.guard';
-import { CurrentUser, CurrentUserPayload } from '../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  CurrentUserPayload,
+} from '../common/decorators/current-user.decorator';
 
 @ApiTags('files')
 @Controller('sandbox/:sandboxId/files')
@@ -34,7 +37,11 @@ export class FilesController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload a file into a sandbox' })
-  @ApiResponse({ status: 201, description: 'File uploaded', type: FileResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'File uploaded',
+    type: FileResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'File too large or invalid' })
   async uploadFile(
     @Param('sandboxId') sandboxId: string,
@@ -49,7 +56,11 @@ export class FilesController {
 
   @Get()
   @ApiOperation({ summary: 'List all files in a sandbox' })
-  @ApiResponse({ status: 200, description: 'List of files', type: [FileResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of files',
+    type: [FileResponseDto],
+  })
   async listFiles(
     @Param('sandboxId') sandboxId: string,
     @CurrentUser() user: CurrentUserPayload,
@@ -67,7 +78,11 @@ export class FilesController {
     @CurrentUser() user: CurrentUserPayload,
     @Res() res: Response,
   ): Promise<void> {
-    const stream = await this.filesService.downloadFile(user.sub, sandboxId, name);
+    const stream = await this.filesService.downloadFile(
+      user.sub,
+      sandboxId,
+      name,
+    );
 
     res.setHeader('Content-Disposition', `attachment; filename="${name}"`);
     res.setHeader('Content-Type', 'application/octet-stream');
