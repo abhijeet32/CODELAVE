@@ -30,14 +30,14 @@ function parseNodeSDK(): SDKInfo {
     let match;
     
     while ((match = methodRegex.exec(content)) !== null) {
-      let description = match[1].replace(/\s*\*\s?/g, ' ').trim();
-      let name = match[2];
+      const description = match[1].replace(/\s*\*\s?/g, ' ').trim();
+      const name = match[2];
       
       // Skip the [Symbol.asyncDispose] method for cleaner UI
       if (name.includes('Symbol.asyncDispose')) continue;
       
-      let params = match[3];
-      let returnType = match[4] ? `: ${match[4].trim()}` : '';
+      const params = match[3];
+      const returnType = match[4] ? `: ${match[4].trim()}` : '';
       
       methods.push({
         name,
@@ -66,14 +66,14 @@ function parsePythonSDK(): SDKInfo {
     let match;
     
     while ((match = methodRegex.exec(content)) !== null) {
-      let name = match[1];
+      const name = match[1];
       
       // Skip private methods
       if (name.startsWith('_')) continue;
       
-      let params = match[2].replace(/\s+/g, ' ').trim();
-      let returnType = match[3] ? ` -> ${match[3].trim()}` : '';
-      let description = match[4].trim();
+      const params = match[2].replace(/\s+/g, ' ').trim();
+      const returnType = match[3] ? ` -> ${match[3].trim()}` : '';
+      const description = match[4].trim();
       
       methods.push({
         name,

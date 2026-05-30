@@ -21,6 +21,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(payload.email || 'No Email');
       // Set name from email prefix or a stored name if available
       setName(payload.email ? payload.email.split('@')[0] : 'User');

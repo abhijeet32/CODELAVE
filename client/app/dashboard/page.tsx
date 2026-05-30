@@ -21,11 +21,11 @@ export default function DashboardOverviewPage() {
         const sandboxes = await listSandboxes();
         setActiveSandboxes(sandboxes.filter(s => s.status === 'RUNNING'));
         setHasApiKey(true);
-      } catch (e) {
+      } catch {
         setHasApiKey(false);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard data');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }

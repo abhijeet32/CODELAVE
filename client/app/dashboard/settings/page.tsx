@@ -42,8 +42,8 @@ export default function SettingsPage() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (err: any) {
-      setPassError(err.message || 'Failed to change password');
+    } catch (err: unknown) {
+      setPassError(err instanceof Error ? err.message : 'Failed to change password');
     } finally {
       setIsUpdating(false);
     }
@@ -57,8 +57,8 @@ export default function SettingsPage() {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userId');
         router.push('/login');
-      } catch (err: any) {
-        alert(err.message || 'Failed to delete account');
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Failed to delete account');
       }
     }
   };

@@ -17,8 +17,8 @@ export default function ApiKeysPage() {
     try {
       const data = await listApiKeys();
       setKeys(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load API keys');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load API keys');
     } finally {
       setLoading(false);
     }
@@ -42,8 +42,8 @@ export default function ApiKeysPage() {
       }
       
       await fetchKeys();
-    } catch (err: any) {
-      setError(err.message || 'Failed to create API key');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create API key');
     } finally {
       setIsCreating(false);
     }
@@ -54,8 +54,8 @@ export default function ApiKeysPage() {
     try {
       await revokeApiKey(id);
       await fetchKeys();
-    } catch (err: any) {
-      alert(err.message || 'Failed to revoke API key');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to revoke API key');
     }
   };
 

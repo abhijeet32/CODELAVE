@@ -21,11 +21,11 @@ export default function SandboxesPage() {
       const data = await listSandboxes();
       setSandboxes(data);
       setHasApiKey(true);
-    } catch (err: any) {
-      if (err.message.includes('API key found')) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes('API key found')) {
         setHasApiKey(false);
       } else {
-        setError(err.message || 'Failed to load sandboxes');
+        setError(err instanceof Error ? err.message : 'Failed to load sandboxes');
       }
     } finally {
       setLoading(false);
@@ -46,8 +46,8 @@ export default function SandboxesPage() {
     try {
       await destroySandbox(id);
       await fetchSandboxes();
-    } catch (err: any) {
-      alert(err.message || 'Failed to destroy sandbox');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to destroy sandbox');
     }
   };
 
@@ -98,7 +98,7 @@ export default function SandboxesPage() {
 
             {filtered.length === 0 ? (
               <div className="empty-state">
-                <p>No sandboxes found for "{activeTab}".</p>
+                <p>No sandboxes found for &quot;{activeTab}&quot;.</p>
                 <Link href="/dashboard/playground" className="btn-primary btn-sm mt-4">Open Playground</Link>
               </div>
             ) : (

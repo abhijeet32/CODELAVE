@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getApiKey, createSandbox, destroySandbox, executeCode, type SandboxResponse } from '@/lib/api';
 
@@ -73,8 +73,8 @@ export default function PlaygroundPage() {
       
       addOutput('system', `Execution finished with status ${result.status} in ${duration}ms`);
       
-    } catch (err: any) {
-      addOutput('stderr', `Error: ${err.message || 'Failed to execute code'}`);
+    } catch (err: unknown) {
+      addOutput('stderr', `Error: ${err instanceof Error ? err.message : 'Failed to execute code'}`);
       setIsStarting(false);
     } finally {
       setIsRunning(false);
