@@ -9,16 +9,6 @@ output "state_bucket_arn" {
 }
 
 
-output "admin_user_name" {
-  description = "Username of the non-root admin IAM user"
-  value       = aws_iam_user.admin.name
-}
-
-output "admin_user_arn" {
-  description = "ARN of the non-root admin IAM user"
-  value       = aws_iam_user.admin.arn
-}
-
 output "api_server_role_arn" {
   description = "ARN of the IAM role to attach to API server EC2 instances"
   value       = aws_iam_role.api_server.arn

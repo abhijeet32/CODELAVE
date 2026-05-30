@@ -45,103 +45,7 @@ resource "aws_s3_bucket_public_access_block" "tf_state" {
 
 
 
-# =============================================================================
-# IAM — ADMIN GROUP & USER (Non-Root)
-# All human operators belong to this group. The MFA enforcement policy ensures
-# that no meaningful action can be taken without MFA active.
-# =============================================================================
 
-# --- MFA Enforcement Policy ---
-# This policy denies ALL API calls unless the caller has authenticated with MFA.
-# The only exceptions are the actions needed to set up MFA itself.
-resource "aws_iam_policy" "require_mfa" {
-  name        = "RequireMFA"
-  description = "Deny all actions unless the user has authenticated with MFA"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "AllowViewAccountInfo"
-        Effect = "Allow"
-        Action = [
-          "iam:GetAccountPasswordPolicy",
-          "iam:GetAccountSummary",
-          "iam:ListVirtualMFADevices"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "AllowManageOwnMFA"
-        Effect = "Allow"
-        Action = [
-          "iam:CreateVirtualMFADevice",
-          "iam:EnableMFADevice",
-          "iam:GetUser",
-          "iam:ListMFADevices",
-          "iam:ListUsers",
-          "iam:ResyncMFADevice",
-          "sts:GetSessionToken"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "DenyAllWithoutMFA"
-        Effect = "Deny"
-        NotAction = [
-          "iam:CreateVirtualMFADevice",
-          "iam:EnableMFADevice",
-          "iam:GetUser",
-          "iam:ListMFADevices",
-          "iam:ListVirtualMFADevices",
-          "iam:ResyncMFADevice",
-          "sts:GetSessionToken"
-        ]
-        Resource = "*"
-        Condition = {
-          BoolIfExists = {
-            "aws:MultiFactorAuthPresent" = "false"
-          }
-        }
-      }
-    ]
-  })
-}
-
-# --- Admin IAM Group ---
-resource "aws_iam_group" "admins" {
-  name = "codelave-admins"
-}
-
-resource "aws_iam_group_policy_attachment" "admins_full_access" {
-  group      = aws_iam_group.admins.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "admins_require_mfa" {
-  group      = aws_iam_group.admins.name
-  policy_arn = aws_iam_policy.require_mfa.arn
-}
-
-# --- Non-Root Admin IAM User ---
-resource "aws_iam_user" "admin" {
-  name          = var.admin_username
-  force_destroy = true # Allows Terraform to delete even if user has keys/certs
-
-  tags = {
-    Purpose = "human-operator-admin"
-  }
-}
-
-resource "aws_iam_user_group_membership" "admin" {
-  user   = aws_iam_user.admin.name
-  groups = [aws_iam_group.admins.name]
-}
-
-# Do not manage a console login profile for the human admin in Terraform.
-# Creating aws_iam_user_login_profile without a pgp_key causes Terraform to
-# generate and store the initial console password in state. Create or reset
-# the admin console password out-of-band instead.
 
 
 # =============================================================================
@@ -269,9 +173,14 @@ resource "aws_iam_instance_profile" "sandbox_host" {
   role = aws_iam_role.sandbox_host.name
 }
 
-# --- Role 3: CI/CD Pipeline Role (assumed via GitHub Actions OIDC) ---
+
+
+# =============================================================================
+# CI/CD Pipeline Role (assumed via GitHub Actions OIDC)
 # This eliminates the need for static AWS access keys in GitHub secrets.
 # GitHub Actions authenticates via OIDC and exchanges a short-lived token.
+# =============================================================================
+
 resource "aws_iam_openid_connect_provider" "github_actions" {
   url = "https://token.actions.githubusercontent.com"
 
@@ -339,11 +248,20 @@ resource "aws_iam_role_policy" "cicd_pipeline_policy" {
           "arn:aws:s3:::${var.state_bucket_name}",
           "arn:aws:s3:::${var.state_bucket_name}/*"
         ]
+      },
+      {
+        Sid    = "EC2DeploymentAccess"
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ssm:SendCommand",
+          "ssm:GetCommandInvocation"
+        ]
+        Resource = "*"
       }
     ]
   })
 }
-
 
 # =============================================================================
 # BILLING ALERT

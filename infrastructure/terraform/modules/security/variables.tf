@@ -1,8 +1,3 @@
-variable "admin_username" {
-  description = "The username for the non-root Terraform-managed admin IAM user"
-  type        = string
-  default     = "codelave-admin"
-}
 
 variable "alert_email" {
   description = "Email address to receive billing and budget alerts"

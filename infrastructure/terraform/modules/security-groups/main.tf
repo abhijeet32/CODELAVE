@@ -11,17 +11,14 @@
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# 1. API Server Security Group
-#    Lives in the public subnet behind a load balancer.
-#    Accepts HTTP (80) and HTTPS (443) from the public internet.
-#    Accepts SSH (22) only from within the VPC CIDR (no public SSH).
+# 1. ALB Security Group
+#    Lives in the public subnet. Accepts HTTP/HTTPS from the public internet.
 # -----------------------------------------------------------------------------
-resource "aws_security_group" "api_server" {
-  name        = "codelave-sg-api-server-${var.environment}"
-  description = "API server: allow HTTP/HTTPS from internet, SSH from VPC only"
+resource "aws_security_group" "alb" {
+  name        = "codelave-sg-alb-${var.environment}"
+  description = "ALB: allow HTTP/HTTPS from internet"
   vpc_id      = var.vpc_id
 
-  # HTTP — allow from anywhere (will sit behind ALB / reverse proxy)
   ingress {
     description = "HTTP from internet"
     from_port   = 80
@@ -30,13 +27,48 @@ resource "aws_security_group" "api_server" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # HTTPS — allow from anywhere
   ingress {
     description = "HTTPS from internet"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allow all outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "codelave-sg-alb-${var.environment}"
+    Environment = var.environment
+    Role        = "alb"
+    ManagedBy   = "terraform"
+  }
+}
+
+# -----------------------------------------------------------------------------
+# 2. API Server Security Group
+#    Lives in the private subnet.
+#    Accepts HTTP (80) ONLY from the ALB.
+#    Accepts SSH (22) from within the VPC CIDR.
+# -----------------------------------------------------------------------------
+resource "aws_security_group" "api_server" {
+  name        = "codelave-sg-api-server-${var.environment}"
+  description = "API server: allow HTTP from ALB only, SSH from VPC only"
+  vpc_id      = var.vpc_id
+
+  # HTTP — allow ONLY from ALB
+  ingress {
+    description     = "HTTP from ALB"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
   }
 
   # SSH — restricted to VPC CIDR only (bastion or SSM jump)
@@ -48,7 +80,7 @@ resource "aws_security_group" "api_server" {
     cidr_blocks = [var.vpc_cidr]
   }
 
-  # Allow all outbound — API server needs to call external services, NAT GW
+  # Allow all outbound
   egress {
     description = "Allow all outbound"
     from_port   = 0
@@ -101,79 +133,3 @@ resource "aws_security_group" "sandbox_host" {
   }
 }
 
-# -----------------------------------------------------------------------------
-# 3. Database Security Group (PostgreSQL — port 5432)
-#    Lives in the private subnet.
-#    NEVER accepts traffic from 0.0.0.0/0.
-#    Only the API server and sandbox host SGs may connect to it.
-# -----------------------------------------------------------------------------
-resource "aws_security_group" "database" {
-  name        = "codelave-sg-database-${var.environment}"
-  description = "PostgreSQL DB: internal access from api_server + sandbox_host only. No public access."
-  vpc_id      = var.vpc_id
-
-  # PostgreSQL — from API server only
-  ingress {
-    description     = "PostgreSQL from API server"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.api_server.id]
-  }
-
-  # PostgreSQL — from sandbox host (for job result persistence)
-  ingress {
-    description     = "PostgreSQL from sandbox host"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.sandbox_host.id]
-  }
-
-
-
-  tags = {
-    Name        = "codelave-sg-database-${var.environment}"
-    Environment = var.environment
-    Role        = "database"
-    ManagedBy   = "terraform"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-# -----------------------------------------------------------------------------
-# 4. Redis Security Group (port 6379)
-#    Lives in the private subnet.
-#    NEVER accepts traffic from 0.0.0.0/0.
-#    Only the API server may connect (caching, session store, job queue).
-# -----------------------------------------------------------------------------
-resource "aws_security_group" "redis" {
-  name        = "codelave-sg-redis-${var.environment}"
-  description = "Redis: internal access from api_server only. No public access."
-  vpc_id      = var.vpc_id
-
-  # Redis — from API server only
-  ingress {
-    description     = "Redis from API server"
-    from_port       = 6379
-    to_port         = 6379
-    protocol        = "tcp"
-    security_groups = [aws_security_group.api_server.id]
-  }
-
-
-
-  tags = {
-    Name        = "codelave-sg-redis-${var.environment}"
-    Environment = var.environment
-    Role        = "redis"
-    ManagedBy   = "terraform"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
