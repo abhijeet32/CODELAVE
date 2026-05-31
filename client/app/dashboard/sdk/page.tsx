@@ -6,13 +6,13 @@ import SDKClientPage from './SDKClientPage';
 // In a real production deployment, this might need to be adjusted or pre-built
 const SDK_PATH = path.resolve(process.cwd(), '../sdk/packages');
 
-interface SDKMethod {
+export interface SDKMethod {
   name: string;
   signature: string;
   description: string;
 }
 
-interface SDKInfo {
+export interface SDKInfo {
   language: string;
   methods: SDKMethod[];
 }

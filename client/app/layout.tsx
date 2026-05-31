@@ -1,15 +1,31 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono, Public_Sans, Libre_Caslon_Display } from 'next/font/google';
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-heading',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+});
+
+const publicSans = Public_Sans({
+  subsets: ['latin'],
+  variable: '--font-navbar',
+});
+
+const libreCaslon = Libre_Caslon_Display({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-hero-heading',
 });
 
 export const metadata: Metadata = {
@@ -23,8 +39,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+    <html lang="en">
+      <body
+        className={`${spaceGrotesk.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} ${publicSans.variable} ${libreCaslon.variable} antialiased overflow-x-hidden bg-[#070707]`}
+      >
+        {children}
+      </body>
     </html>
   );
 }
