@@ -122,6 +122,14 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: none;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
