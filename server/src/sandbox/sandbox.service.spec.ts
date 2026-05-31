@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { SandboxService } from './sandbox.service';
 import { PrismaService } from '../database/prisma.service';
 import { DockerService } from '../docker/docker.service';
@@ -104,12 +108,14 @@ describe('SandboxService', () => {
         status: 'CREATING',
         timeoutAt: new Date(),
       });
-      dockerService.createContainer.mockRejectedValue(new Error('Docker unreachable'));
+      dockerService.createContainer.mockRejectedValue(
+        new Error('Docker unreachable'),
+      );
       prisma.sandbox.update.mockResolvedValue({});
 
-      await expect(
-        service.createSandbox('user-1'),
-      ).rejects.toThrow('Docker unreachable');
+      await expect(service.createSandbox('user-1')).rejects.toThrow(
+        'Docker unreachable',
+      );
 
       expect(prisma.sandbox.update).toHaveBeenCalledWith({
         where: { id: 'sbx-1' },
@@ -137,9 +143,9 @@ describe('SandboxService', () => {
     it('should throw NotFoundException if sandbox does not exist', async () => {
       prisma.sandbox.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.getSandbox('user-1', 'nonexistent'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.getSandbox('user-1', 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ForbiddenException for non-owner', async () => {
@@ -150,9 +156,9 @@ describe('SandboxService', () => {
         template: { name: 'python3' },
       });
 
-      await expect(
-        service.getSandbox('user-1', 'sbx-1'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.getSandbox('user-1', 'sbx-1')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -168,7 +174,9 @@ describe('SandboxService', () => {
 
       await service.destroySandbox('user-1', 'sbx-1');
 
-      expect(dockerService.destroyContainer).toHaveBeenCalledWith('container-123');
+      expect(dockerService.destroyContainer).toHaveBeenCalledWith(
+        'container-123',
+      );
       expect(prisma.sandbox.update).toHaveBeenCalledWith({
         where: { id: 'sbx-1' },
         data: expect.objectContaining({
@@ -184,9 +192,9 @@ describe('SandboxService', () => {
         status: 'RUNNING',
       });
 
-      await expect(
-        service.destroySandbox('user-1', 'sbx-1'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.destroySandbox('user-1', 'sbx-1')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should throw BadRequestException if already destroyed', async () => {
@@ -196,9 +204,9 @@ describe('SandboxService', () => {
         status: 'DESTROYED',
       });
 
-      await expect(
-        service.destroySandbox('user-1', 'sbx-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.destroySandbox('user-1', 'sbx-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 

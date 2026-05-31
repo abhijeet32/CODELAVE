@@ -82,7 +82,12 @@ describe('ExecutionService', () => {
         finishedAt: new Date(),
       });
 
-      const result = await service.executeCode('user-1', 'sbx-1', 'print("hello")', 'python');
+      const result = await service.executeCode(
+        'user-1',
+        'sbx-1',
+        'print("hello")',
+        'python',
+      );
 
       expect(result.id).toBe('exec-1');
       expect(result.output).toBe('hello\n');
@@ -104,7 +109,9 @@ describe('ExecutionService', () => {
         startedAt: new Date(),
       });
 
-      dockerService.executeCode.mockRejectedValue(new Error('Container crashed'));
+      dockerService.executeCode.mockRejectedValue(
+        new Error('Container crashed'),
+      );
       prisma.execution.update.mockResolvedValue({});
 
       await expect(

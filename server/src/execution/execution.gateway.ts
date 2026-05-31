@@ -23,7 +23,9 @@ interface ExecutePayload {
   namespace: '/ws/execute',
   cors: { origin: '*' },
 })
-export class ExecutionGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ExecutionGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server!: Server;
 
@@ -48,7 +50,10 @@ export class ExecutionGateway implements OnGatewayConnection, OnGatewayDisconnec
         throw new UnauthorizedException('Missing API key');
       }
 
-      const hashedKey = crypto.createHash('sha256').update(apiKey).digest('hex');
+      const hashedKey = crypto
+        .createHash('sha256')
+        .update(apiKey)
+        .digest('hex');
 
       const keyRecord = await this.prisma.apiKey.findUnique({
         where: { key: hashedKey },

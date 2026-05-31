@@ -39,12 +39,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 7.7.0
- * Query Engine version: 75cbdc1eb7150937890ad5465d861175c6624711
+ * Prisma Client JS version: 7.8.0
+ * Query Engine version: 3c6e192761c0362d496ed980de936e2f3cebcd3a
  */
 Prisma.prismaVersion = {
-  client: "7.7.0",
-  engine: "75cbdc1eb7150937890ad5465d861175c6624711"
+  client: "7.8.0",
+  engine: "3c6e192761c0362d496ed980de936e2f3cebcd3a"
 }
 
 Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
@@ -211,8 +211,8 @@ exports.Prisma.ModelName = {
  */
 const config = {
   "previewFeatures": [],
-  "clientVersion": "7.7.0",
-  "engineVersion": "75cbdc1eb7150937890ad5465d861175c6624711",
+  "clientVersion": "7.8.0",
+  "engineVersion": "3c6e192761c0362d496ed980de936e2f3cebcd3a",
   "activeProvider": "postgresql",
   "inlineSchema": "generator client {\n  provider     = \"prisma-client-js\"\n  output       = \"../src/generated/prisma\"\n  moduleFormat = \"cjs\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\n// ─── ENUMS ──────────────────────────────────────────────────\n\nenum UserPlan {\n  FREE\n  PRO\n  ENTERPRISE\n}\n\nenum UserStatus {\n  ACTIVE\n  SUSPENDED\n  DELETED\n}\n\nenum SandboxStatus {\n  CREATING\n  RUNNING\n  STOPPED\n  DESTROYED\n  ERROR\n  TIMED_OUT\n  LOST\n}\n\n// ─── USERS ──────────────────────────────────────────────────\n\nmodel User {\n  id        String     @id @default(uuid())\n  email     String     @unique\n  password  String\n  plan      UserPlan   @default(FREE)\n  status    UserStatus @default(ACTIVE)\n  createdAt DateTime   @default(now())\n  updatedAt DateTime   @updatedAt\n\n  apiKeys   ApiKey[]\n  sandboxes Sandbox[]\n  usage     Usage[]\n\n  @@map(\"users\")\n}\n\n// ─── API KEYS ───────────────────────────────────────────────\n\nmodel ApiKey {\n  id        String    @id @default(uuid())\n  userId    String\n  key       String    @unique\n  name      String\n  isActive  Boolean   @default(true)\n  createdAt DateTime  @default(now())\n  lastUsed  DateTime?\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@index([userId])\n  @@index([key])\n  @@map(\"api_keys\")\n}\n\n// ─── TEMPLATES ──────────────────────────────────────────────\n\nmodel Template {\n  id          String  @id @default(uuid())\n  name        String  @unique\n  dockerImage String\n  hasInternet Boolean @default(false)\n  description String?\n\n  sandboxes Sandbox[]\n\n  @@map(\"templates\")\n}\n\n// ─── SANDBOXES ──────────────────────────────────────────────\n\nmodel Sandbox {\n  id          String        @id @default(uuid())\n  userId      String\n  status      SandboxStatus @default(CREATING)\n  templateId  String?\n  containerId String?       @unique\n  createdAt   DateTime      @default(now())\n  timeoutAt   DateTime\n  destroyedAt DateTime?\n\n  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)\n  template   Template?   @relation(fields: [templateId], references: [id])\n  executions Execution[]\n  files      File[]\n\n  @@index([userId])\n  @@index([status])\n  @@index([timeoutAt])\n  @@map(\"sandboxes\")\n}\n\n// ─── EXECUTIONS ─────────────────────────────────────────────\n\nmodel Execution {\n  id         String    @id @default(uuid())\n  sandboxId  String\n  code       String\n  output     String?\n  error      String?\n  startedAt  DateTime  @default(now())\n  finishedAt DateTime?\n  durationMs Int?\n\n  sandbox Sandbox @relation(fields: [sandboxId], references: [id], onDelete: Cascade)\n\n  @@index([sandboxId])\n  @@map(\"executions\")\n}\n\n// ─── FILES ──────────────────────────────────────────────────\n\nmodel File {\n  id         String   @id @default(uuid())\n  sandboxId  String\n  name       String\n  size       Int\n  s3Path     String?\n  uploadedAt DateTime @default(now())\n\n  sandbox Sandbox @relation(fields: [sandboxId], references: [id], onDelete: Cascade)\n\n  @@index([sandboxId])\n  @@map(\"files\")\n}\n\n// ─── USAGE ──────────────────────────────────────────────────\n\nmodel Usage {\n  id             String @id @default(uuid())\n  userId         String\n  month          String // format: \"2026-05\"\n  sandboxCount   Int    @default(0)\n  executionCount Int    @default(0)\n  computeSeconds Float  @default(0)\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@unique([userId, month])\n  @@index([userId])\n  @@map(\"usage\")\n}\n"
 }
