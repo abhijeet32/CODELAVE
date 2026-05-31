@@ -20,6 +20,9 @@ import {
 } from "@tabler/icons-react";
 import { Zap } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import logo from "../../public/logo.png";
+import { usePathname } from "next/navigation";
 
 interface Links {
   icon: string;
@@ -129,7 +132,7 @@ export const DesktopSidebar = ({
         >
           <div className="flex items-center gap-2">
             <div className="codelave-sidebar-brand-icon">
-              <Zap className="w-5 h-5 text-black" />
+              <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="object-contain" priority />
             </div>
             <AnimatePresence>
               {open && (
@@ -180,13 +183,13 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "codelave-mobile-sidebar-header",
+          "codelave-mobile-sidebar-header md:hidden",
         )}
         {...props}
       >
         <div className="flex items-center gap-2">
           <div className="codelave-sidebar-brand-icon">
-            <Zap className="w-5 h-5 text-black" />
+            <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="object-contain" priority />
           </div>
           <span className="codelave-sidebar-brand-text-mobile">Codelave</span>
         </div>
@@ -218,7 +221,6 @@ export const MobileSidebar = ({
                 }}
                 className={cn(
                   "codelave-mobile-sidebar-panel",
-                  className,
                 )}
               >
                 <div
@@ -246,6 +248,8 @@ export const SidebarLink = ({
   className?: string;
 }) => {
   const { open, animate } = useSidebar();
+  const pathname = usePathname();
+  const isActive = pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href));
 
   const icon = {
     IconArrowLeft,
@@ -270,11 +274,12 @@ export const SidebarLink = ({
       href={link.href}
       className={cn(
         "codelave-sidebar-link",
+        isActive && "codelave-sidebar-link-active",
         className,
       )}
       {...props}
     >
-      <Iconcomp className="codelave-sidebar-link-icon" />
+      <Iconcomp className={cn("codelave-sidebar-link-icon", isActive && "codelave-sidebar-link-icon-active")} />
 
       <motion.span
         animate={{

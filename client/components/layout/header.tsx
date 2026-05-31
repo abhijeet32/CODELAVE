@@ -115,7 +115,7 @@ export default function Navbar() {
                     </div>
 
                     <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-                        <AnimatedButton href="/login">
+                        <AnimatedButton href="/signup">
                             Get Started
                         </AnimatedButton>
                     </div>
