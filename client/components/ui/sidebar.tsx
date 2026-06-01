@@ -18,10 +18,8 @@ import {
   IconCreditCard,
   IconSettings,
 } from "@tabler/icons-react";
-import { Zap } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "../../public/logo.png";
 import { usePathname } from "next/navigation";
 
 interface Links {
@@ -174,7 +172,6 @@ export const DesktopSidebar = ({
 };
 
 export const MobileSidebar = ({
-  className,
   children,
   ...props
 }: React.ComponentProps<"div">) => {

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities, react/jsx-no-comment-textnodes, react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";

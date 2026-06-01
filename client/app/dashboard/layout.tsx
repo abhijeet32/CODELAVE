@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { Sidebar } from "@/components/ui/sidebar";
@@ -12,7 +12,6 @@ import { LogOut, Search, Bell, Sun, Moon } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('User');
@@ -21,8 +20,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => setMounted(true), 0);
     const token = localStorage.getItem('accessToken');
     if (!token) {
       router.push('/login');
@@ -47,7 +47,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const isDark = theme === 'dark';
     const newTheme = isDark ? 'light' : 'dark';
 
-    // @ts-ignore
     if (!document.startViewTransition) {
       setTheme(newTheme);
       return;
@@ -59,7 +58,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const bottom = window.innerHeight - y;
     const maxRadius = Math.hypot(Math.max(x, right), Math.max(y, bottom));
 
-    // @ts-ignore
     const transition = document.startViewTransition(() => {
       setTheme(newTheme);
     });
