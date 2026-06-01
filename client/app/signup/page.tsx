@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from 'react';
@@ -60,7 +61,7 @@ export default function SignupPage() {
 
       // Redirect to dashboard
       router.push('/dashboard');
-    } catch (err: unknown) {
+    } catch (err: any) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
