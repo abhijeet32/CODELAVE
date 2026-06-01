@@ -88,7 +88,7 @@ export default function SignupPage() {
         {/* Header */}
         <div className="flex flex-col items-center mb-8 text-center">
           <Link href="/" className="flex items-center gap-2 group mb-6">
-            <Image src="/logo.png" alt="Codelave" width={36} height={36} className="w-9 h-9 object-contain" />
+            <Image src="/logo.png" alt="Codelave" width={36} height={36} className="w-9 h-auto object-contain" />
             <span className="text-[20px] font-semibold text-[#F2F2F2] font-navbar">Codelave</span>
           </Link>
           

@@ -23,7 +23,12 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Codelave - Managed Code Execution",
   description: "The ultimate platform for secure, scalable, and instant code execution environments.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
+
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default function RootLayout({
   children,
@@ -31,11 +36,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${plusJakarta.variable} ${inter.variable} ${jetbrainsMono.variable} antialiased overflow-x-hidden bg-[#070707]`}
+        className={`${plusJakarta.variable} ${inter.variable} ${jetbrainsMono.variable} antialiased overflow-x-hidden bg-background text-foreground`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

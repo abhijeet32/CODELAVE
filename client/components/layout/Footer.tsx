@@ -42,7 +42,7 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="md:col-span-5 p-10 max-md:p-8">
             <div className="flex items-center gap-3 mb-4">
-              <Image src={logo} alt="Codelave" width={44} height={44} className="w-11 h-11 object-contain" />
+              <Image src={logo} alt="Codelave" width={44} height={44} className="w-11 h-auto object-contain" />
               <h2 className="font-hero-heading text-[#F2F2F2] text-[24px] font-normal tracking-tight">
                 Codelave
               </h2>

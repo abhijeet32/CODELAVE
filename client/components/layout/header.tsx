@@ -82,7 +82,7 @@ export default function Navbar() {
                     <div className="flex lg:flex-1">
                         <a href="#" className="">
                             <div className="flex items-center justify-center gap-2 group">
-                                <Image src={logo} alt="Codelave" width={40} height={40} className="w-10 h-10 object-contain" />
+                                <Image src={logo} alt="Codelave" width={40} height={40} className="w-10 h-auto object-contain" />
                                 <span className="text-[20px] font-semibold text-[#F2F2F2] font-navbar">Codelave</span>
                             </div>
                         </a>
@@ -131,7 +131,7 @@ export default function Navbar() {
                     <DialogPanel className="fixed inset-y-0 right-0 z-[120] w-full max-w-sm bg-[#0a0a0c] border-l border-white/5 p-6 shadow-2xl">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center justify-center gap-2">
-                                <Image src="/logo.png" alt="Codelave" width={36} height={36} className="w-9 h-9 object-contain" />
+                                <Image src="/logo.png" alt="Codelave" width={36} height={36} className="w-9 h-auto object-contain" />
                                 <span className="text-[20px] font-semibold text-[#F2F2F2] font-navbar">Codelave</span>
                             </div>
                             <button

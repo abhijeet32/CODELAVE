@@ -132,7 +132,7 @@ export const DesktopSidebar = ({
         >
           <div className="flex items-center gap-2">
             <div className="codelave-sidebar-brand-icon">
-              <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="object-contain" priority />
+              <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="w-auto h-auto object-contain" priority />
             </div>
             <AnimatePresence>
               {open && (
@@ -189,7 +189,7 @@ export const MobileSidebar = ({
       >
         <div className="flex items-center gap-2">
           <div className="codelave-sidebar-brand-icon">
-            <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="object-contain" priority />
+            <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="w-auto h-auto object-contain" priority />
           </div>
           <span className="codelave-sidebar-brand-text-mobile">Codelave</span>
         </div>
