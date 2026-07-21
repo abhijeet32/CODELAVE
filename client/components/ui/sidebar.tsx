@@ -10,7 +10,6 @@ import {
   IconReport,
   IconAlertHexagon,
   IconUsb,
-  IconLayoutSidebar,
   IconBugFilled,
   IconKey,
   IconBox,

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getApiKey, createSandbox, destroySandbox, executeCode, type SandboxResponse } from '@/lib/api';
 

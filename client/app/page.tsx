@@ -11,7 +11,6 @@ import FeaturesSection from "@/components/sections/FeaturesSection";
 import PricingSection from "@/components/sections/PricingSection";
 import FaqSection from "@/components/sections/FaqSection";
 import CtaSection from "@/components/sections/CtaSection";
-import SplashScreen from "@/components/SplashScreen";
 
 export default function Page() {
   return (
@@ -119,8 +118,7 @@ export default function Page() {
 
 
 // import Link from 'next/link';
-// import SplashScreen from '@/components/SplashScreen';
-// import Footer from '@/components/Footer';
+// // import Footer from '@/components/Footer';
 
 // export const metadata = {
 //   title: 'Codelave - Managed Code Execution',

@@ -20,7 +20,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => {
     setTimeout(() => setMounted(true), 0);
     const token = localStorage.getItem('accessToken');
@@ -32,6 +31,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(payload.email || 'No Email');
       
       const updateName = () => {

@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSandbox, listExecutions, listFiles, type SandboxResponse, type ExecutionResponse, type FileResponse } from '@/lib/api';
 
@@ -10,7 +10,6 @@ type Tab = 'Executions' | 'Files';
 
 export default function SandboxDetailPage() {
   const { id } = useParams() as { id: string };
-  const router = useRouter();
   const [sandbox, setSandbox] = useState<SandboxResponse | null>(null);
   const [executions, setExecutions] = useState<ExecutionResponse[]>([]);
   const [files, setFiles] = useState<FileResponse[]>([]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { SDKInfo } from './page';
 
 function Toast({ message, visible }: { message: string, visible: boolean }) {
