@@ -37,10 +37,8 @@ export default function ApiKeysPage() {
       const result = await createApiKey(newKeyName.trim());
       setCreatedKey(result);
       
-      // Auto-save the first created key as playground key if none exists
-      if (!localStorage.getItem('playgroundApiKey')) {
-        localStorage.setItem('playgroundApiKey', result.key);
-      }
+      // Auto-save the created key as playground key so it's always ready to use
+      localStorage.setItem('playgroundApiKey', result.key);
       
       await fetchKeys();
     } catch (err: any) {

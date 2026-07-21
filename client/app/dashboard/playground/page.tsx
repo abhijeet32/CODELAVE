@@ -24,14 +24,25 @@ export default function PlaygroundPage() {
       setHasApiKey(false);
     }
     
-    // Cleanup on unmount
-    return () => {
-      if (sandbox && sandbox.status === 'RUNNING') {
-        // Destroy sandbox asynchronously
-        destroySandbox(sandbox.id).catch(() => {});
-      }
-    };
+    // Restore saved code and template
+    const savedCode = localStorage.getItem('playground_code');
+    const savedTemplate = localStorage.getItem('playground_template');
+    if (savedCode) setCode(savedCode);
+    if (savedTemplate) setTemplate(savedTemplate);
+
+    // We removed the automatic destruction on unmount so sandboxes 
+    // can stay alive for viewing in the dashboard after navigating away.
+    // They will be cleaned up by the server's background orphan cleanup job.
   }, [sandbox]);
+
+  // Auto-save code and template as the user types/selects
+  useEffect(() => {
+    localStorage.setItem('playground_code', code);
+  }, [code]);
+
+  useEffect(() => {
+    localStorage.setItem('playground_template', template);
+  }, [template]);
 
   const addOutput = (type: 'stdout' | 'stderr' | 'system', text: string) => {
     setOutput(prev => [...prev, { type, text }]);

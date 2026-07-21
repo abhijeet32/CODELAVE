@@ -192,11 +192,14 @@
    CODELAVE DASHBOARD & SIDEBAR DESIGN SYSTEM
    ========================================== */
 
-/* Dashboard Wrapper */
 .codelave-dash-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding-top: 1rem;
   background-color: var(--dash-bg);
   color: var(--dash-text);
   font-family: var(--font-body);
@@ -467,7 +470,8 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   background-color: var(--dash-bg);
 }
 
@@ -475,7 +479,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 2rem;
+  padding: 1.25rem;
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
@@ -490,8 +494,8 @@
 /* Dashboard Headers */
 .dash-header {
   border-bottom: 1px dashed var(--dash-border);
-  padding-bottom: 1.5rem;
-  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -517,8 +521,8 @@
 .stats-grid {
   display: grid;
   grid-template-cols: repeat(1, minmax(0, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 @media (min-width: 768px) {
@@ -531,7 +535,7 @@
 .stat-card, .panel {
   background-color: var(--dash-surface);
   border: 1px dashed var(--dash-border);
-  padding: 1.5rem;
+  padding: 1.25rem;
   position: relative;
   transition: border-color 0.2s;
 }
@@ -546,7 +550,7 @@
   letter-spacing: 0.1em;
   color: var(--dash-muted);
   font-weight: 600;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .stat-value {
@@ -567,8 +571,8 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px dashed var(--dash-border);
-  padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .panel-title {

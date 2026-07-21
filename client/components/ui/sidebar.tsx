@@ -93,10 +93,12 @@ export const SidebarBody = (
   },
 ) => {
   return (
-    <div className="codelave-sidebar-root">
+    <>
       <DesktopSidebar {...props} />
-      <MobileSidebar {...(props as React.ComponentProps<"div">)} />
-    </div>
+      <MobileSidebar>
+        {props.children}
+      </MobileSidebar>
+    </>
   );
 };
 
@@ -124,14 +126,16 @@ export const DesktopSidebar = ({
       >
         <div
           className={cn(
-            "mb-4 flex items-center",
-            open ? "justify-between" : "justify-center",
+            "mb-6 flex",
+            open ? "flex-row items-center justify-between" : "flex-col items-center justify-center gap-4",
           )}
         >
           <div className="flex items-center gap-2">
-            <div className="codelave-sidebar-brand-icon">
-              <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="w-auto h-auto object-contain" priority />
-            </div>
+            {open && (
+              <div className="codelave-sidebar-brand-icon">
+                <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="w-auto h-auto object-contain dark:brightness-0 dark:invert" priority />
+              </div>
+            )}
             <AnimatePresence>
               {open && (
                 <motion.div
@@ -147,23 +151,15 @@ export const DesktopSidebar = ({
             </AnimatePresence>
           </div>
 
-          <AnimatePresence>
-            {open && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <IconLayoutSidebar
-                  className="codelave-sidebar-toggle-icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpen(false);
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div style={{ display: "flex" }}>
+            <IconMenu2
+              className="codelave-sidebar-toggle-icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(!open);
+              }}
+            />
+          </div>
         </div>
         {children}
       </motion.div>
@@ -186,7 +182,7 @@ export const MobileSidebar = ({
       >
         <div className="flex items-center gap-2">
           <div className="codelave-sidebar-brand-icon">
-            <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="w-auto h-auto object-contain" priority />
+            <Image src="/logo.png" alt="Codelave Logo" width={26} height={26} className="w-auto h-auto object-contain dark:brightness-0 dark:invert" priority />
           </div>
           <span className="codelave-sidebar-brand-text-mobile">Codelave</span>
         </div>
@@ -270,7 +266,7 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "codelave-sidebar-link",
+        "codelave-sidebar-link group relative",
         isActive && "codelave-sidebar-link-active",
         className,
       )}
@@ -287,6 +283,11 @@ export const SidebarLink = ({
       >
         {link.label}
       </motion.span>
+      {!open && (
+        <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#0F0F0F] border border-white/10 shadow-lg text-white text-xs font-semibold rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+          {link.label}
+        </div>
+      )}
     </Link>
   );
 };
