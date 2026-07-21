@@ -229,8 +229,10 @@ export class ExecutionService {
     return executions.map((e) => ({
       id: e.id,
       sandboxId: e.sandboxId,
+      code: e.code,
       output: e.output,
       error: e.error,
+      status: e.error ? 'FAILED' : 'COMPLETED',
       durationMs: e.durationMs || 0,
       startedAt: e.startedAt,
       finishedAt: e.finishedAt,

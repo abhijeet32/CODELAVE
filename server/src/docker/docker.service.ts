@@ -61,6 +61,26 @@ export class DockerService {
       const memoryBytes = this.parseMemoryLimit(config.memoryLimit);
       const cpuNanoCpus = Math.floor(parseFloat(config.cpuLimit) * 1e9);
 
+      // Auto-pull image if it doesn't exist locally (useful for AWS/production)
+      try {
+        const images = await this.docker.listImages({ filters: { reference: [config.image] } });
+        if (images.length === 0) {
+          this.logger.log(`Image ${config.image} not found locally, pulling...`);
+          await new Promise<void>((resolve, reject) => {
+            this.docker.pull(config.image, (err: Error | null, stream: any) => {
+              if (err) return reject(err);
+              this.docker.modem.followProgress(stream, (onFinishedErr: Error | null) => {
+                if (onFinishedErr) return reject(onFinishedErr);
+                resolve();
+              });
+            });
+          });
+          this.logger.log(`Successfully pulled image ${config.image}`);
+        }
+      } catch (err: any) {
+        this.logger.warn(`Failed to auto-pull image ${config.image}: ${err.message}`);
+      }
+
       const container = await this.docker.createContainer({
         Image: config.image,
         name: `codelave-sandbox-${config.sandboxId}`,
@@ -87,7 +107,7 @@ export class DockerService {
           CapAdd: ['SETUID', 'SETGID'],
         },
         WorkingDir: '/sandbox',
-        Cmd: ['python3', '-c', 'import time; time.sleep(86400)'], // Keep container alive without needing /bin/sh
+        Cmd: ['tail', '-f', '/dev/null'], // Universally keep container alive across Node, Python, and Ubuntu
       });
 
       await container.start();

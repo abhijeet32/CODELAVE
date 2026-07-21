@@ -28,13 +28,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.push('/login');
       return;
     }
+    let cleanup = () => {};
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       setEmail(payload.email || 'No Email');
-      // Set name from email prefix or a stored name if available
-      setName(payload.email ? payload.email.split('@')[0] : 'User');
+      
+      const updateName = () => {
+        const stored = localStorage.getItem('userName');
+        if (stored) {
+          setName(stored);
+        } else if (payload.email) {
+          setName(payload.email.split('@')[0]);
+        }
+      };
+      updateName();
+
+      window.addEventListener('userNameUpdated', updateName);
+      cleanup = () => window.removeEventListener('userNameUpdated', updateName);
     } catch { /* ignore */ }
+    
     setLoading(false);
+    return cleanup;
   }, [router]);
 
   const handleLogout = () => {
