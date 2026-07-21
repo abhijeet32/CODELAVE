@@ -3,12 +3,9 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { MdArrowOutward } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "../../public/logo.png";
-import { Bug } from "lucide-react";
-import { motion } from "framer-motion";
 
 const navigation = [
     { name: "Home", href: "/" },

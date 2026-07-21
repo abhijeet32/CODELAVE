@@ -15,23 +15,6 @@ function CornerBrackets({ tl = true, tr = true, bl = true, br = true }: { tl?: b
   );
 }
 
-/** 3×3 dot-grid SVG icon */
-function GridIcon() {
-  return (
-    <svg className="w-3.5 h-3.5 shrink-0 text-inherit" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <rect x="2" y="2" width="3" height="3" rx="0.5" />
-      <rect x="6.5" y="2" width="3" height="3" rx="0.5" />
-      <rect x="11" y="2" width="3" height="3" rx="0.5" />
-      <rect x="2" y="6.5" width="3" height="3" rx="0.5" />
-      <rect x="6.5" y="6.5" width="3" height="3" rx="0.5" />
-      <rect x="11" y="6.5" width="3" height="3" rx="0.5" />
-      <rect x="2" y="11" width="3" height="3" rx="0.5" />
-      <rect x="6.5" y="11" width="3" height="3" rx="0.5" />
-      <rect x="11" y="11" width="3" height="3" rx="0.5" />
-    </svg>
-  );
-}
-
 export default function Footer() {
   return (
     <footer className="relative bg-[#070707] z-10 w-full px-6 lg:px-8">

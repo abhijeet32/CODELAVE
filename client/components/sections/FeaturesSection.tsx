@@ -239,12 +239,10 @@ const features = [
 function FeatureRow({
     feature,
     Illustration,
-    index,
     reversed,
 }: {
     feature: (typeof features)[0];
     Illustration: React.ComponentType;
-    index: number;
     reversed: boolean;
 }) {
     return (
@@ -371,7 +369,7 @@ export default function FeaturesSection() {
 
                 {/* Feature Rows */}
                 <div className="relative w-full mt-16 mb-12">
-                    {features.map((feature, index) => (
+                    {features.map((feature) => (
                         <FeatureRow
                             key={index}
                             feature={feature}
