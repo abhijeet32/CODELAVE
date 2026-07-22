@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: codelave-client-deploy
+    labels:
+        app: codelave-client
+
+spec:
+    replicas: 1
+    strategy:
+        type: RollingUpdate
+        rollingUpdate: 
+            maxSurge: 1
+            maxUnavailable: 25%
+    selector:
+        matchLabels:
+            app: codelave-client
+
+    template:
+        metadata:
+            labels:
+                app: codelave-client
+
+        spec:
+            containers:
+            - name: codelave-client-deploy
+              image: abhi0874/codelave-client:v3
+              imagePullPolicy: Always
+              
+              env:
+              - name: HOSTNAME
+                value: "0.0.0.0"
+                
+              ports:
+              - containerPort: 3001

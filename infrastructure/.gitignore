@@ -1,0 +1,2 @@
+manifests/k8s/server/server-config.yml
+manifests/k8s/server/server-secrets.yml
