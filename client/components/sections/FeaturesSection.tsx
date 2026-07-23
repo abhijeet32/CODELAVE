@@ -369,12 +369,11 @@ export default function FeaturesSection() {
 
                 {/* Feature Rows */}
                 <div className="relative w-full mt-16 mb-12">
-                    {features.map((feature) => (
+                    {features.map((feature, index) => (
                         <FeatureRow
                             key={index}
                             feature={feature}
                             Illustration={illustrations[index]}
-                            index={index}
                             reversed={index % 2 !== 0}
                         />
                     ))}

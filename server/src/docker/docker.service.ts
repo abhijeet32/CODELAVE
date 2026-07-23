@@ -100,7 +100,7 @@ export class DockerService {
           // Tmpfs for writable directories
           Tmpfs: {
             '/tmp': 'rw,noexec,nosuid,size=64m',
-            '/sandbox': 'rw,noexec,nosuid,size=128m',
+            '/sandbox': 'rw,noexec,nosuid,uid=1000,gid=1000,size=128m',
           },
           // Drop all capabilities, add only what's needed
           CapDrop: ['ALL'],

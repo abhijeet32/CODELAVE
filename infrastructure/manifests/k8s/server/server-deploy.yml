@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codelave-server-deploy
+  labels:
+    app: codelave-server
+
+spec:
+  replicas: 1
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+
+  selector:
+    matchLabels:
+      app: codelave-server 
+
+  template:
+    metadata:
+      labels:
+        app: codelave-server
+
+    spec:
+      securityContext:
+        runAsUser: 0
+      containers:
+      - name: codelave-server-deploy
+        image: abhi0874/codelave-server:v2
+        imagePullPolicy: Always
+        
+        envFrom:
+        - configMapRef:
+            name: codelave-server-config
+        - secretRef:
+            name: codelave-server-secrets
+            
+        ports:
+        - containerPort: 3000
+        
+        # REQUIRED to allow backend to spawn Docker sandboxes on the host
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock

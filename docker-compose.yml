@@ -24,7 +24,7 @@ services:
       - db
 
   client:
-    image: abhi0874/codelave-client:v2
+    image: abhi0874/codelave-client:v3
     container_name: codelave-client
     ports:
       - "3001:3001"
